@@ -1,0 +1,186 @@
+'use client';
+
+import { motion, AnimatePresence } from 'framer-motion';
+import { useState, useEffect } from 'react';
+import Link from 'next/link';
+
+interface MenuItem {
+  label: string;
+  href: string;
+  number: string;
+}
+
+const menuItems: MenuItem[] = [
+  { label: 'Home', href: '/', number: '01' },
+  { label: 'About', href: '/about', number: '02' },
+  { label: 'Sister Concerns', href: '/sister-concerns', number: '03' },
+  { label: 'Products', href: '/products', number: '04' },
+  { label: 'Certifications', href: '/certifications', number: '05' },
+  { label: 'Clients', href: '/clients', number: '06' },
+  { label: 'Factories & Machines', href: '/factories', number: '07' },
+  { label: 'News & Media', href: '/news', number: '08' },
+  { label: 'Career', href: '/career', number: '09' },
+  { label: 'Contact', href: '/contact', number: '10' },
+];
+
+const socialLinks = [
+  { label: 'LinkedIn', href: 'https://linkedin.com' },
+  { label: 'Facebook', href: 'https://facebook.com' },
+  { label: 'Instagram', href: 'https://instagram.com' },
+];
+
+interface StaggeredMenuProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+const StaggeredMenu = ({ isOpen, onClose }: StaggeredMenuProps) => {
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isOpen]);
+
+  const menuVariants = {
+    closed: {
+      x: '-100%',
+      transition: {
+        duration: 0.5,
+        ease: [0.6, 0.01, 0.05, 0.95],
+      },
+    },
+    open: {
+      x: 0,
+      transition: {
+        duration: 0.5,
+        ease: [0.6, 0.01, 0.05, 0.95],
+      },
+    },
+  };
+
+  const itemVariants = {
+    closed: { x: -50, opacity: 0 },
+    open: (i: number) => ({
+      x: 0,
+      opacity: 1,
+      transition: {
+        delay: 0.1 + i * 0.05,
+        duration: 0.5,
+        ease: [0.6, 0.01, 0.05, 0.95],
+      },
+    }),
+  };
+
+  return (
+    <AnimatePresence>
+      {isOpen && (
+        <>
+          {/* Backdrop */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            className="fixed inset-0 bg-black/60 z-[998] backdrop-blur-sm"
+            onClick={onClose}
+          />
+
+          {/* Menu Panel */}
+          <motion.div
+            initial="closed"
+            animate="open"
+            exit="closed"
+            variants={menuVariants}
+            className="fixed top-0 left-0 h-full w-full md:w-[500px] lg:w-[600px] bg-primary z-[999] shadow-2xl overflow-y-auto"
+          >
+            <div className="p-8 md:p-12 lg:p-16 h-full flex flex-col">
+              {/* Close Button */}
+              <div className="flex justify-end mb-12">
+                <button
+                  onClick={onClose}
+                  className="text-white hover:text-accent transition-colors duration-300 group"
+                  aria-label="Close menu"
+                >
+                  <svg
+                    className="w-8 h-8"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                </button>
+              </div>
+
+              {/* Menu Items */}
+              <nav className="flex-1">
+                <ul className="space-y-2">
+                  {menuItems.map((item, index) => (
+                    <motion.li
+                      key={item.href}
+                      custom={index}
+                      initial="closed"
+                      animate="open"
+                      exit="closed"
+                      variants={itemVariants}
+                    >
+                      <Link
+                        href={item.href}
+                        onClick={onClose}
+                        className="group flex items-center gap-6 py-3 text-white hover:text-accent transition-all duration-300"
+                      >
+                        <span className="text-sm font-light text-accent/60 min-w-[2rem]">
+                          {item.number}
+                        </span>
+                        <span className="text-3xl md:text-4xl lg:text-5xl font-playfair font-semibold group-hover:translate-x-2 transition-transform duration-300">
+                          {item.label}
+                        </span>
+                      </Link>
+                    </motion.li>
+                  ))}
+                </ul>
+              </nav>
+
+              {/* Social Links */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.6, duration: 0.5 }}
+                className="mt-12 pt-8 border-t border-white/20"
+              >
+                <p className="text-accent text-sm font-medium mb-4 tracking-wider">
+                  FOLLOW US
+                </p>
+                <div className="flex gap-6">
+                  {socialLinks.map((social) => (
+                    <a
+                      key={social.label}
+                      href={social.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-white hover:text-accent transition-colors duration-300 text-lg font-inter"
+                    >
+                      {social.label}
+                    </a>
+                  ))}
+                </div>
+              </motion.div>
+            </div>
+          </motion.div>
+        </>
+      )}
+    </AnimatePresence>
+  );
+};
+
+export default StaggeredMenu;
