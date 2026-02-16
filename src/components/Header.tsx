@@ -38,7 +38,7 @@ const Header = () => {
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
           showTopBar ? 'translate-y-0' : '-translate-y-full'
         } ${
-          isScrolled ? 'bg-white shadow-lg' : 'bg-white/95 backdrop-blur-sm'
+          isScrolled ? 'bg-gradient-to-b from-white/40 via-white/30 to-transparent backdrop-blur-md shadow-lg' : 'bg-gradient-to-b from-white/50 via-white/30 to-transparent backdrop-blur-sm'
         }`}
       >
         {/* Top Bar */}
@@ -160,7 +160,7 @@ const Header = () => {
               {/* Menu Button */}
               <button
                 onClick={() => setIsMenuOpen(true)}
-                className="flex items-center gap-3 text-primary hover:text-accent transition-colors duration-300 group"
+                className="flex items-center gap-3 text-primary hover:text-accent transition-colors duration-300 group border border-primary/20 rounded-full px-3 py-2 md:px-4 md:py-2.5 hover:border-accent/40"
                 aria-label="Open menu"
               >
                 <div className="flex flex-col gap-1.5">

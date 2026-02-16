@@ -40,12 +40,12 @@ const Hero = () => {
         </video>
         
         {/* Fallback background image if video doesn't load */}
-        <div 
+        {/* <div 
           className="absolute inset-0 bg-cover bg-center"
           style={{
             backgroundImage: 'url(https://images.unsplash.com/photo-1558618666-fcd25c85cd64?q=80&w=2940)',
           }}
-        />
+        /> */}
         
         {/* Dark overlay */}
         <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/50 to-black/70" />

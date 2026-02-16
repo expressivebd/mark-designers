@@ -92,7 +92,7 @@ const Products = () => {
             >
               <div className="card overflow-hidden hover-glow">
                 {/* Product Image - 1:1 Aspect Ratio */}
-                <div className="relative aspect-square overflow-hidden bg-slate-100">
+                <div className="relative aspect-square overflow-hidden bg-blue-200">
                   <Image
                     src={product.image}
                     alt={product.name}
