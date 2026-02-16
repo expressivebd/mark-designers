@@ -7,21 +7,21 @@ import Link from 'next/link';
 
 const newsItems = [
   {
-    image: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?q=80&w=2940',
+    image: '/p1.jpg',
     date: 'January 15, 2026',
     title: 'Mark Designers Expands Production Capacity',
     excerpt:
       'New state-of-the-art facility increases our daily output and enhances efficiency across all production lines.',
   },
   {
-    image: 'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?q=80&w=2940',
+    image: '/p2.jpg',
     date: 'December 10, 2025',
     title: 'Sustainability Award Recognition',
     excerpt:
       'Honored for outstanding commitment to environmental sustainability and ethical manufacturing practices.',
   },
   {
-    image: 'https://images.unsplash.com/photo-1557804506-669a67965ba0?q=80&w=2874',
+    image: '/p3.jpg',
     date: 'November 20, 2025',
     title: 'Partnership with Global Fashion Brands',
     excerpt:

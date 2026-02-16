@@ -8,17 +8,17 @@ import Image from 'next/image';
 const sisterConcerns = [
   {
     name: 'Mark Designers Limited',
-    image: '/concerns/1.png',
+    image: '/p1.jpg',
     description: 'Premium garment manufacturing with state-of-the-art facilities',
   },
   {
     name: 'Mark Wear Limited',
-    image: '/concerns/2.png',
+    image: '/p2.jpg',
     description: 'Specialized in contemporary fashion and casualwear',
   },
   {
     name: 'Mark 2000 Limited',
-    image: '/concerns/3.png',
+    image: '/p3.jpg',
     description: 'Expert in technical and performance apparel',
   },
 ];
