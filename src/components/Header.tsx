@@ -14,7 +14,7 @@ const Header = () => {
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
-      
+
       // Determine if scrolling down or up
       if (currentScrollY > lastScrollY && currentScrollY > 100) {
         // Scrolling down - hide header
@@ -23,7 +23,7 @@ const Header = () => {
         // Scrolling up - show header
         setShowTopBar(true);
       }
-      
+
       setLastScrollY(currentScrollY);
       setIsScrolled(currentScrollY > 50);
     };
@@ -35,11 +35,9 @@ const Header = () => {
   return (
     <>
       <header
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-          showTopBar ? 'translate-y-0' : '-translate-y-full'
-        } ${
-          isScrolled ? 'bg-gradient-to-b from-white/40 via-white/30 to-transparent backdrop-blur-md shadow-lg' : 'bg-gradient-to-b from-white/50 via-white/30 to-transparent backdrop-blur-sm'
-        }`}
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${showTopBar ? 'translate-y-0' : '-translate-y-full'
+          } ${isScrolled ? 'bg-gradient-to-b from-white/40 via-white/30 to-transparent backdrop-blur-md shadow-lg' : 'bg-gradient-to-b from-white/50 via-white/30 to-transparent backdrop-blur-sm'
+          }`}
       >
         {/* Top Bar */}
         <div className="bg-primary text-white py-2 text-sm">
@@ -113,7 +111,7 @@ const Header = () => {
                 </a>
               </div>
             </div>
-            
+
             {/* Mobile View - Icons Only */}
             <div className="md:hidden">
               <button
@@ -134,7 +132,7 @@ const Header = () => {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                 </svg>
               </button>
-              
+
               {/* Dropdown */}
               {isTopBarOpen && (
                 <div className="mt-2 space-y-2 text-center pb-2">
@@ -186,13 +184,17 @@ const Header = () => {
                 </p>
               </Link>
 
-              {/* Contact Button */}
-              <Link
-                href="/contact"
-                className="btn-primary text-xs md:text-base px-3 py-2 md:px-8 md:py-3 rounded-md"
+              {/* Download Catalog Button */}
+              <a
+                href="/catalog.pdf"
+                download
+                className="btn-primary text-xs md:text-base px-3 py-2 md:px-8 md:py-3 rounded-md inline-flex items-center gap-2"
               >
-                Contact Us
-              </Link>
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                Download Catalog
+              </a>
             </div>
           </div>
         </div>

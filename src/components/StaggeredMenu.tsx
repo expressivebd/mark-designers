@@ -8,19 +8,26 @@ interface MenuItem {
   label: string;
   href: string;
   number: string;
+  children?: { label: string; href: string }[];
 }
 
 const menuItems: MenuItem[] = [
   { label: 'Home', href: '/', number: '01' },
   { label: 'About', href: '/about', number: '02' },
-  { label: 'Sister Concerns', href: '/sister-concerns', number: '03' },
+  {
+    label: 'Sister Concerns',
+    href: '/sister-concerns',
+    number: '03',
+    children: [
+      { label: 'Mark Designers Limited', href: '/sister-concerns/mark-designers' },
+      { label: 'Mark Wear Limited', href: '/sister-concerns/mark-wear' },
+      { label: 'Mark 2000 Limited', href: '/sister-concerns/mark-2000' },
+    ],
+  },
   { label: 'Products', href: '/products', number: '04' },
   { label: 'Certifications', href: '/certifications', number: '05' },
   { label: 'Clients', href: '/clients', number: '06' },
-  { label: 'Factories & Machines', href: '/factories', number: '07' },
-  { label: 'News & Media', href: '/news', number: '08' },
-  { label: 'Career', href: '/career', number: '09' },
-  { label: 'Contact', href: '/contact', number: '10' },
+  { label: 'Contact', href: '/contact', number: '07' },
 ];
 
 const socialLinks = [
@@ -35,11 +42,14 @@ interface StaggeredMenuProps {
 }
 
 const StaggeredMenu = ({ isOpen, onClose }: StaggeredMenuProps) => {
+  const [expandedItem, setExpandedItem] = useState<string | null>(null);
+
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = 'unset';
+      setExpandedItem(null);
     }
     return () => {
       document.body.style.overflow = 'unset';
@@ -134,18 +144,81 @@ const StaggeredMenu = ({ isOpen, onClose }: StaggeredMenuProps) => {
                       exit="closed"
                       variants={itemVariants}
                     >
-                      <Link
-                        href={item.href}
-                        onClick={onClose}
-                        className="group flex items-center gap-6 py-3 text-white hover:text-accent transition-all duration-300"
-                      >
-                        <span className="text-sm font-light text-accent/60 min-w-[2rem]">
-                          {item.number}
-                        </span>
-                        <span className="text-3xl md:text-4xl lg:text-5xl font-playfair font-semibold group-hover:translate-x-2 transition-transform duration-300">
-                          {item.label}
-                        </span>
-                      </Link>
+                      {item.children ? (
+                        /* Accordion Item */
+                        <div>
+                          <button
+                            onClick={() =>
+                              setExpandedItem(
+                                expandedItem === item.label ? null : item.label
+                              )
+                            }
+                            className="group flex items-center gap-6 py-3 text-white hover:text-accent transition-colors duration-300 w-full text-left"
+                          >
+                            <span className="text-sm font-light text-accent/60 min-w-[2rem]">
+                              {item.number}
+                            </span>
+                            <span className="text-3xl md:text-4xl lg:text-5xl font-playfair font-semibold">
+                              {item.label}
+                            </span>
+                            <svg
+                              className={`w-6 h-6 md:w-8 md:h-8 ml-auto transition-transform duration-300 ${expandedItem === item.label ? 'rotate-180' : ''
+                                }`}
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M19 9l-7 7-7-7"
+                              />
+                            </svg>
+                          </button>
+
+                          {/* Accordion Children */}
+                          <AnimatePresence>
+                            {expandedItem === item.label && (
+                              <motion.div
+                                initial={{ height: 0, opacity: 0 }}
+                                animate={{ height: 'auto', opacity: 1 }}
+                                exit={{ height: 0, opacity: 0 }}
+                                transition={{ duration: 0.3, ease: 'easeInOut' }}
+                                className="overflow-hidden"
+                              >
+                                <ul className="pl-14 md:pl-16 space-y-1 pb-2">
+                                  {item.children.map((child) => (
+                                    <li key={child.href}>
+                                      <Link
+                                        href={child.href}
+                                        onClick={onClose}
+                                        className="block py-2 text-lg md:text-xl font-inter text-white/70 hover:text-accent transition-colors duration-300"
+                                      >
+                                        {child.label}
+                                      </Link>
+                                    </li>
+                                  ))}
+                                </ul>
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+                        </div>
+                      ) : (
+                        /* Regular Item */
+                        <Link
+                          href={item.href}
+                          onClick={onClose}
+                          className="group flex items-center gap-6 py-3 text-white hover:text-accent transition-colors duration-300"
+                        >
+                          <span className="text-sm font-light text-accent/60 min-w-[2rem]">
+                            {item.number}
+                          </span>
+                          <span className="text-3xl md:text-4xl lg:text-5xl font-playfair font-semibold">
+                            {item.label}
+                          </span>
+                        </Link>
+                      )}
                     </motion.li>
                   ))}
                 </ul>

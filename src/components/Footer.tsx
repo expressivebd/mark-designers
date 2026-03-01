@@ -10,7 +10,6 @@ const Footer = () => {
     { label: 'About Us', href: '/about' },
     { label: 'Sister Concerns', href: '/sister-concerns' },
     { label: 'Certifications', href: '/certifications' },
-    { label: 'Career', href: '/career' },
   ];
 
   const productLinks = [
@@ -21,10 +20,9 @@ const Footer = () => {
   ];
 
   const resourceLinks = [
-    { label: 'News & Media', href: '/news' },
-    { label: 'Sustainability', href: '/sustainability' },
     { label: 'Clients', href: '/clients' },
     { label: 'Contact', href: '/contact' },
+    { label: 'Products', href: '/products' },
   ];
 
   const socialLinks = [
