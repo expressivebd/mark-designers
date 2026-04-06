@@ -7,18 +7,35 @@ import BrandsClients from '@/components/BrandsClients';
 import Sustainability from '@/components/Sustainability';
 import News from '@/components/News';
 import CallToAction from '@/components/CallToAction';
+import {
+  getHomepage,
+  getSisterConcerns,
+  getProducts,
+  getCertifications,
+  getClients,
+  getNews,
+} from '@/lib/data';
 
-export default function Home() {
+export default async function Home() {
+  const [homepage, sisterConcerns, products, certifications, clients, news] = await Promise.all([
+    getHomepage(),
+    getSisterConcerns(),
+    getProducts(),
+    getCertifications(),
+    getClients(),
+    getNews(),
+  ]);
+
   return (
     <>
-      <Hero />
-      <AboutUs />
-      <SisterConcerns />
-      <Products />
-      <Certifications />
-      <BrandsClients />
-      <Sustainability />
-      <News />
+      <Hero data={homepage?.hero} />
+      <AboutUs text={homepage?.about?.text} stats={homepage?.about?.stats} />
+      <SisterConcerns items={sisterConcerns} />
+      <Products items={products} />
+      <Certifications items={certifications} />
+      <BrandsClients items={clients} />
+      <Sustainability items={homepage?.sustainability} />
+      <News items={news} />
       <CallToAction />
     </>
   );

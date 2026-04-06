@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
 import Image from 'next/image';
 
-const sustainabilityItems = [
+const defaultSustainabilityItems = [
   {
     title: 'PLANET',
     image: '/p1.jpg',
@@ -29,7 +29,16 @@ const sustainabilityItems = [
   },
 ];
 
-const Sustainability = () => {
+type SustainabilityItem = {
+  title: string;
+  image?: string;
+  imageUrl?: string;
+  description: string;
+  link: string;
+};
+
+const Sustainability = ({ items }: { items?: SustainabilityItem[] }) => {
+  const list = items?.length ? items : defaultSustainabilityItems;
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const [ref, inView] = useInView({
     triggerOnce: true,
@@ -61,7 +70,7 @@ const Sustainability = () => {
           transition={{ duration: 0.6, delay: 0.2 }}
           className="hidden md:flex h-[600px] lg:h-[700px] gap-2 rounded-2xl overflow-hidden"
         >
-          {sustainabilityItems.map((item, index) => (
+          {list.map((item, index) => (
             <div
               key={index}
               className="relative overflow-hidden cursor-pointer group"
@@ -74,7 +83,7 @@ const Sustainability = () => {
             >
               {/* Background Image */}
               <Image
-                src={item.image}
+                src={item.imageUrl || item.image || '/p1.jpg'}
                 alt={item.title}
                 fill
                 className="object-cover"
@@ -137,7 +146,7 @@ const Sustainability = () => {
 
         {/* Mobile: Stacked Cards with tap-to-expand */}
         <div className="md:hidden space-y-4">
-          {sustainabilityItems.map((item, index) => (
+          {list.map((item, index) => (
             <motion.div
               key={index}
               initial={{ opacity: 0, y: 30 }}
@@ -151,7 +160,7 @@ const Sustainability = () => {
               onClick={() => setActiveIndex(activeIndex === index ? null : index)}
             >
               <Image
-                src={item.image}
+                src={item.imageUrl || item.image || '/p1.jpg'}
                 alt={item.title}
                 fill
                 className="object-cover"

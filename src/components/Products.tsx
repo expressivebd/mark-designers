@@ -5,7 +5,7 @@ import { useInView } from 'react-intersection-observer';
 import Link from 'next/link';
 import Image from 'next/image';
 
-const products = [
+const defaultProducts = [
   {
     name: 'T-Shirts',
     image: "/products/1.png",
@@ -56,10 +56,15 @@ const products = [
   },
 ];
 
-// Show only first 12 products
-const displayProducts = products.slice(0, 12);
+type ProductItem = {
+  name: string;
+  image?: string;
+  imageUrl?: string;
+};
 
-const Products = () => {
+const Products = ({ items }: { items?: ProductItem[] }) => {
+  const list = items?.length ? items : defaultProducts;
+  const displayProducts = list.slice(0, 12);
   const [ref, inView] = useInView({
     triggerOnce: true,
     threshold: 0.1,
@@ -94,7 +99,7 @@ const Products = () => {
                 {/* Product Image - 1:1 Aspect Ratio */}
                 <div className="relative aspect-square overflow-hidden bg-blue-200">
                   <Image
-                    src={product.image}
+                    src={product.imageUrl || product.image || '/products/1.png'}
                     alt={product.name}
                     width={400}
                     height={400}

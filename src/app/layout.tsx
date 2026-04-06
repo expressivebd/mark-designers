@@ -3,6 +3,7 @@
 import { Playfair_Display, Inter } from 'next/font/google'
 import './globals.css'
 import { useState, useEffect } from 'react'
+import { usePathname } from 'next/navigation'
 import Loader from '@/components/Loader'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
@@ -71,6 +72,8 @@ export default function RootLayout({
 
 function RootContent({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
+  const pathname = usePathname();
+  const isAdminRoute = pathname?.startsWith('/admin');
 
   return (
     <>
@@ -78,11 +81,11 @@ function RootContent({ children }: { children: React.ReactNode }) {
       
       {!isLoading && (
         <>
-          <Header />
-          <main className="overflow-x-hidden">
+          {!isAdminRoute && <Header />}
+          <main className={isAdminRoute ? 'min-h-screen bg-slate-50' : 'overflow-x-hidden'}>
             {children}
           </main>
-          <Footer />
+          {!isAdminRoute && <Footer />}
         </>
       )}
     </>

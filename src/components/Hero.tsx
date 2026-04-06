@@ -3,23 +3,35 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect } from 'react';
 
-const headlines = [
+const defaultHeadlines = [
   'Crafting Quality Since 1995',
   'Excellence in Garment Manufacturing',
   'Your Trusted Global Partner',
   'Innovation Meets Tradition',
 ];
 
-const Hero = () => {
+const defaultSubheadline =
+  'Serving clients across Europe, North America, and Asia with premium garment manufacturing';
+
+type HeroData = {
+  videoUrl: string;
+  headlines: string[];
+  subheadline: string;
+};
+
+const Hero = ({ data }: { data?: HeroData | null }) => {
+  const heroHeadlines = data?.headlines?.length ? data.headlines : defaultHeadlines;
+  const heroSubheadline = data?.subheadline || defaultSubheadline;
+  const heroVideo = data?.videoUrl || '/videos/hero-video.mp4';
   const [currentHeadline, setCurrentHeadline] = useState(0);
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setCurrentHeadline((prev) => (prev + 1) % headlines.length);
+      setCurrentHeadline((prev) => (prev + 1) % heroHeadlines.length);
     }, 4000); // Change headline every 4 seconds
 
     return () => clearInterval(interval);
-  }, []);
+  }, [heroHeadlines.length]);
 
   return (
     <section className="relative h-screen w-full overflow-hidden">
@@ -33,7 +45,7 @@ const Hero = () => {
           className="absolute inset-0 w-full h-full object-cover"
         >
           <source
-            src="/videos/hero-video.mp4"
+            src={heroVideo}
             type="video/mp4"
           />
           {/* Fallback for browsers that don't support video */}
@@ -68,7 +80,7 @@ const Hero = () => {
                 }}
                 className="text-4xl md:text-6xl lg:text-8xl font-playfair font-bold text-white leading-tight"
               >
-                {headlines[currentHeadline]}
+                {heroHeadlines[currentHeadline]}
               </motion.h1>
             </AnimatePresence>
           </div>
@@ -80,7 +92,7 @@ const Hero = () => {
             transition={{ duration: 0.8, delay: 0.5 }}
             className="text-lg md:text-xl lg:text-2xl text-white/90 font-light mb-12 max-w-3xl mx-auto"
           >
-            Serving clients across Europe, North America, and Asia with premium garment manufacturing
+            {heroSubheadline}
           </motion.p>
 
           {/* CTA Buttons */}

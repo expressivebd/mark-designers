@@ -5,7 +5,7 @@ import { useInView } from 'react-intersection-observer';
 import Image from 'next/image';
 import { useState } from 'react';
 
-const clients = [
+const defaultClients = [
   { name: 'a', logo: '/brands/1.png' },
   { name: 'b', logo: '/brands/2.png' },
   { name: 'c', logo: '/brands/3.png' },
@@ -18,10 +18,15 @@ const clients = [
   { name: 'j', logo: '/brands/10.png' },
 ];
 
-// Duplicate for seamless loop
-const duplicatedClients = [...clients, ...clients];
+type ClientItem = {
+  name: string;
+  logo?: string;
+  logoUrl?: string;
+};
 
-const BrandsClients = () => {
+const BrandsClients = ({ items }: { items?: ClientItem[] }) => {
+  const list = items?.length ? items : defaultClients;
+  const duplicatedClients = [...list, ...list];
   const [ref, inView] = useInView({
     triggerOnce: true,
     threshold: 0.1,
@@ -77,7 +82,7 @@ const BrandsClients = () => {
                 className="flex-shrink-0 w-[200px] h-[120px] bg-slate-50 rounded-sm shadow-md hover:shadow-xl transition-all duration-300 flex items-center justify-center p-6 hover:scale-105 border border-slate-100"
               >
                 <Image
-                  src={client.logo}
+                  src={client.logoUrl || client.logo || '/brands/1.png'}
                   alt={client.name}
                   width={200}
                   height={120}

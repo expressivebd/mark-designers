@@ -5,14 +5,21 @@ import { useInView } from 'react-intersection-observer';
 import CountUp from 'react-countup';
 import Link from 'next/link';
 
-const stats = [
+const defaultStats = [
   { number: 30, suffix: '+', label: 'Years of Experience' },
   { number: 20, suffix: '+', label: 'Certifications' },
   { number: 1000, suffix: '+', label: 'Clients Served' },
   { number: 45000, suffix: '+', label: 'Daily Outputs' },
 ];
 
-const AboutUs = () => {
+const defaultText =
+  'Since 1995, Mark Designers Ltd. has been serving clients across Europe, North America, and Asia with quality and commitment. The company portfolio also expanded by setting up two other production facilities- Mark Wear Limited and Mark 2000 Limited. All of these three state-of-the-art production facilities are fully compliant under the supervision of Accord and RSC.';
+
+type StatItem = { number: number; suffix: string; label: string };
+
+const AboutUs = ({ text, stats }: { text?: string; stats?: StatItem[] }) => {
+  const aboutText = text || defaultText;
+  const aboutStats = stats?.length ? stats : defaultStats;
   const [ref, inView] = useInView({
     triggerOnce: true,
     threshold: 0.2,
@@ -46,11 +53,7 @@ const AboutUs = () => {
           className="max-w-4xl mx-auto text-center mb-20"
         >
           <p className="text-body text-lg md:text-xl leading-relaxed">
-            Since 1995, Mark Designers Ltd. has been serving clients across Europe, North
-            America, and Asia with quality and commitment. The company portfolio also
-            expanded by setting up two other production facilities- Mark Wear Limited and
-            Mark 2000 Limited. All of these three state-of-the-art production facilities are
-            fully compliant under the supervision of Accord and RSC.
+            {aboutText}
           </p>
         </motion.div>
 
@@ -59,7 +62,7 @@ const AboutUs = () => {
           ref={statsRef}
           className="grid grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8"
         >
-          {stats.map((stat, index) => (
+          {aboutStats.map((stat, index) => (
             <motion.div
               key={index}
               initial={{ opacity: 0, y: 30 }}

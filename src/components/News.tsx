@@ -5,7 +5,17 @@ import { useInView } from 'react-intersection-observer';
 import Image from 'next/image';
 import Link from 'next/link';
 
-const newsItems = [
+type NewsItem = {
+  id?: string;
+  image?: string;
+  imageUrl?: string;
+  date: string;
+  title: string;
+  excerpt: string;
+  link?: string;
+};
+
+const defaultNewsItems: NewsItem[] = [
   {
     image: '/p1.jpg',
     date: 'January 15, 2026',
@@ -36,7 +46,8 @@ const newsItems = [
   },
 ];
 
-const News = () => {
+const News = ({ items }: { items?: NewsItem[] }) => {
+  const list = items?.length ? items : defaultNewsItems;
   const [ref, inView] = useInView({
     triggerOnce: true,
     threshold: 0.1,
@@ -60,7 +71,7 @@ const News = () => {
         {/* News Grid - Horizontal scroll on mobile */}
         <div className="overflow-x-auto hide-scrollbar pb-4 -mx-4 px-4 md:overflow-visible">
           <div className="flex md:grid md:grid-cols-2 lg:grid-cols-4 gap-6 min-w-max md:min-w-0">
-            {newsItems.map((news, index) => (
+            {list.map((news, index) => (
               <motion.div
                 key={index}
                 initial={{ opacity: 0, y: 30 }}
@@ -72,7 +83,7 @@ const News = () => {
                   {/* Image */}
                   <div className="relative h-48 overflow-hidden bg-slate-100">
                     <Image
-                      src={news.image}
+                      src={news.imageUrl || news.image || '/p1.jpg'}
                       alt={news.title}
                       width={400}
                       height={300}
@@ -100,7 +111,7 @@ const News = () => {
 
                     {/* Read More */}
                     <Link
-                      href="/news"
+                      href={news.link || '/news'}
                       className="inline-flex items-center gap-2 text-primary font-medium hover:text-accent transition-colors duration-300 text-sm group/link"
                     >
                       <span>Read More</span>

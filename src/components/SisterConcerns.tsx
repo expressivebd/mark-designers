@@ -5,7 +5,16 @@ import { useInView } from 'react-intersection-observer';
 import Link from 'next/link';
 import Image from 'next/image';
 
-const sisterConcerns = [
+type SisterConcernItem = {
+  id?: string;
+  name: string;
+  image?: string;
+  imageUrl?: string;
+  description: string;
+  link?: string;
+};
+
+const defaultSisterConcerns: SisterConcernItem[] = [
   {
     name: 'Mark Designers Limited',
     image: '/p1.jpg',
@@ -23,7 +32,8 @@ const sisterConcerns = [
   },
 ];
 
-const SisterConcerns = () => {
+const SisterConcerns = ({ items }: { items?: SisterConcernItem[] }) => {
+  const list = items?.length ? items : defaultSisterConcerns;
   const [ref, inView] = useInView({
     triggerOnce: true,
     threshold: 0.1,
@@ -46,7 +56,7 @@ const SisterConcerns = () => {
 
         {/* Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {sisterConcerns.map((concern, index) => (
+          {list.map((concern, index) => (
             <motion.div
               key={index}
               initial={{ opacity: 0, x: -100 }}
@@ -62,7 +72,7 @@ const SisterConcerns = () => {
                 {/* Image */}
                 <div className="relative h-[60%] overflow-hidden">
                   <Image
-                    src={concern.image}
+                    src={concern.imageUrl || concern.image || '/p1.jpg'}
                     alt={concern.name}
                     width={600}
                     height={800}
@@ -83,7 +93,7 @@ const SisterConcerns = () => {
                   </div>
 
                   <Link
-                    href="/sister-concerns"
+                    href={concern.link || '/sister-concerns'}
                     className="inline-flex items-center gap-2 text-primary font-medium hover:text-accent transition-colors duration-300 group/link mt-6"
                   >
                     <span>Know More</span>

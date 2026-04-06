@@ -5,7 +5,7 @@ import { useInView } from 'react-intersection-observer';
 import Image from 'next/image';
 import { useState } from 'react';
 
-const certifications = [
+const defaultCertifications = [
   { name: 'ISO 9001', logo: '/certificates/1.png' },
   { name: 'WRAP', logo: '/certificates/2.png' },
   { name: 'BSCI', logo: '/certificates/3.png' },
@@ -20,10 +20,15 @@ const certifications = [
   { name: 'GOTS', logo: '/certificates/12.png' },
 ];
 
-// Duplicate for seamless loop
-const duplicatedCertifications = [...certifications, ...certifications];
+type CertificationItem = {
+  name: string;
+  logo?: string;
+  logoUrl?: string;
+};
 
-const Certifications = () => {
+const Certifications = ({ items }: { items?: CertificationItem[] }) => {
+  const list = items?.length ? items : defaultCertifications;
+  const duplicatedCertifications = [...list, ...list];
   const [ref, inView] = useInView({
     triggerOnce: true,
     threshold: 0.1,
@@ -78,8 +83,8 @@ const Certifications = () => {
                 key={index}
                 className="flex-shrink-0 w-[200px] h-[120px] bg-white rounded-sm shadow-md hover:shadow-xl transition-all duration-300 flex items-center justify-center p-6 hover:scale-105"
               >
-                <Image
-                  src={cert.logo}
+                  <Image
+                    src={cert.logoUrl || cert.logo || '/certificates/1.png'}
                   alt={cert.name}
                   width={200}
                   height={120}
