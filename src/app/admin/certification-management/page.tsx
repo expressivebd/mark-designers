@@ -1,5 +1,5 @@
 import AdminPageHeader from '@/components/admin/AdminPageHeader';
-import CollectionManager from '@/components/admin/CollectionManager';
+import CertificationManager from '@/components/admin/CertificationManager';
 
 export default function CertificationManagementAdmin() {
   return (
@@ -8,15 +8,7 @@ export default function CertificationManagementAdmin() {
         title="Certification Management"
         description="Manage certification logos for the homepage carousel."
       />
-      <CollectionManager
-        title="Certification"
-        endpoint="/api/admin/certifications"
-        folder="certifications"
-        fields={[
-          { name: 'name', label: 'Name', type: 'text' },
-          { name: 'logoUrl', label: 'Logo', type: 'image' },
-        ]}
-      />
+      <CertificationManager />
     </div>
   );
 }

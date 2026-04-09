@@ -1,3 +1,4 @@
+import type { AuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 
 const adminEmail = process.env.ADMIN_EMAIL;
@@ -7,7 +8,7 @@ if (!adminEmail || !adminPassword) {
   throw new Error('ADMIN_EMAIL and ADMIN_PASSWORD must be set');
 }
 
-export const authOptions = {
+export const authOptions: AuthOptions = {
   providers: [
     CredentialsProvider({
       name: 'Credentials',

@@ -11,6 +11,12 @@ interface MenuItem {
   children?: { label: string; href: string }[];
 }
 
+type SisterConcernNavItem = {
+  id: string;
+  name: string;
+  href: string;
+};
+
 const menuItems: MenuItem[] = [
   { label: 'Home', href: '/', number: '01' },
   { label: 'About', href: '/about', number: '02' },
@@ -18,11 +24,7 @@ const menuItems: MenuItem[] = [
     label: 'Sister Concerns',
     href: '/sister-concerns',
     number: '03',
-    children: [
-      { label: 'Mark Designers Limited', href: '/sister-concerns/mark-designers' },
-      { label: 'Mark Wear Limited', href: '/sister-concerns/mark-wear' },
-      { label: 'Mark 2000 Limited', href: '/sister-concerns/mark-2000' },
-    ],
+    children: [],
   },
   { label: 'Products', href: '/products', number: '04' },
   { label: 'Certifications', href: '/certifications', number: '05' },
@@ -43,6 +45,7 @@ interface StaggeredMenuProps {
 
 const StaggeredMenu = ({ isOpen, onClose }: StaggeredMenuProps) => {
   const [expandedItem, setExpandedItem] = useState<string | null>(null);
+  const [sisterConcerns, setSisterConcerns] = useState<SisterConcernNavItem[]>([]);
 
   useEffect(() => {
     if (isOpen) {
@@ -54,6 +57,26 @@ const StaggeredMenu = ({ isOpen, onClose }: StaggeredMenuProps) => {
     return () => {
       document.body.style.overflow = 'unset';
     };
+  }, [isOpen]);
+
+  useEffect(() => {
+    const loadSisterConcerns = async () => {
+      try {
+        const response = await fetch('/api/sister-concerns');
+        if (!response.ok) {
+          return;
+        }
+
+        const data = (await response.json()) as SisterConcernNavItem[];
+        setSisterConcerns(data || []);
+      } catch {
+        setSisterConcerns([]);
+      }
+    };
+
+    if (isOpen) {
+      loadSisterConcerns();
+    }
   }, [isOpen]);
 
   const menuVariants = {
@@ -144,8 +167,74 @@ const StaggeredMenu = ({ isOpen, onClose }: StaggeredMenuProps) => {
                       exit="closed"
                       variants={itemVariants}
                     >
-                      {item.children ? (
+                      {item.label === 'Sister Concerns' ? (
                         /* Accordion Item */
+                        <div>
+                          <div className="group flex items-center gap-6 py-3 text-white">
+                            <span className="text-sm font-light text-accent/60 min-w-[2rem]">
+                              {item.number}
+                            </span>
+                            <Link
+                              href={item.href}
+                              onClick={onClose}
+                              className="text-3xl md:text-4xl lg:text-5xl font-playfair font-semibold hover:text-accent transition-colors duration-300"
+                            >
+                              {item.label}
+                            </Link>
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setExpandedItem(expandedItem === item.label ? null : item.label)
+                              }
+                              aria-label="Toggle sister concerns list"
+                              className="ml-auto hover:text-accent transition-colors duration-300"
+                            >
+                              <svg
+                                className={`h-6 w-6 md:h-8 md:w-8 transition-transform duration-300 ${
+                                  expandedItem === item.label ? 'rotate-180' : ''
+                                }`}
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M19 9l-7 7-7-7"
+                                />
+                              </svg>
+                            </button>
+                          </div>
+
+                          {/* Accordion Children */}
+                          <AnimatePresence>
+                            {expandedItem === item.label && (
+                              <motion.div
+                                initial={{ height: 0, opacity: 0 }}
+                                animate={{ height: 'auto', opacity: 1 }}
+                                exit={{ height: 0, opacity: 0 }}
+                                transition={{ duration: 0.3, ease: 'easeInOut' }}
+                                className="overflow-hidden"
+                              >
+                                <ul className="pl-14 md:pl-16 space-y-1 pb-2">
+                                  {sisterConcerns.map((child) => (
+                                    <li key={child.href}>
+                                      <Link
+                                        href={child.href}
+                                        onClick={onClose}
+                                        className="block py-2 text-lg md:text-xl font-inter text-white/70 hover:text-accent transition-colors duration-300"
+                                      >
+                                        {child.name}
+                                      </Link>
+                                    </li>
+                                  ))}
+                                </ul>
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+                        </div>
+                      ) : item.children ? (
                         <div>
                           <button
                             onClick={() =>
@@ -177,7 +266,6 @@ const StaggeredMenu = ({ isOpen, onClose }: StaggeredMenuProps) => {
                             </svg>
                           </button>
 
-                          {/* Accordion Children */}
                           <AnimatePresence>
                             {expandedItem === item.label && (
                               <motion.div

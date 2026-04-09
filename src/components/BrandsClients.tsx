@@ -5,7 +5,13 @@ import { useInView } from 'react-intersection-observer';
 import Image from 'next/image';
 import { useState } from 'react';
 
-const defaultClients = [
+type ClientItem = {
+  name: string;
+  logo?: string;
+  logoUrl?: string;
+};
+
+const defaultClients: ClientItem[] = [
   { name: 'a', logo: '/brands/1.png' },
   { name: 'b', logo: '/brands/2.png' },
   { name: 'c', logo: '/brands/3.png' },
@@ -17,12 +23,6 @@ const defaultClients = [
   { name: 'i', logo: '/brands/9.png' },
   { name: 'j', logo: '/brands/10.png' },
 ];
-
-type ClientItem = {
-  name: string;
-  logo?: string;
-  logoUrl?: string;
-};
 
 const BrandsClients = ({ items }: { items?: ClientItem[] }) => {
   const list = items?.length ? items : defaultClients;
@@ -79,7 +79,8 @@ const BrandsClients = ({ items }: { items?: ClientItem[] }) => {
             {duplicatedClients.map((client, index) => (
               <div
                 key={index}
-                className="flex-shrink-0 w-[200px] h-[120px] bg-slate-50 rounded-sm shadow-md hover:shadow-xl transition-all duration-300 flex items-center justify-center p-6 hover:scale-105 border border-slate-100"
+                className="flex-shrink-0 w-[200px] h-[120px] bg-slate-50 rounded-sm shadow-md hover:shadow-xl transition-all duration-300 flex cursor-pointer items-center justify-center border border-slate-100 p-6 hover:scale-105"
+                title={client.name}
               >
                 <Image
                   src={client.logoUrl || client.logo || '/brands/1.png'}

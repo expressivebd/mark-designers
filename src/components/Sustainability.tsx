@@ -5,7 +5,15 @@ import { motion } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
 import Image from 'next/image';
 
-const defaultSustainabilityItems = [
+type SustainabilityItem = {
+  title: string;
+  image?: string;
+  imageUrl?: string;
+  description: string;
+  link: string;
+};
+
+const defaultSustainabilityItems: SustainabilityItem[] = [
   {
     title: 'PLANET',
     image: '/p1.jpg',
@@ -28,14 +36,6 @@ const defaultSustainabilityItems = [
     link: '/about',
   },
 ];
-
-type SustainabilityItem = {
-  title: string;
-  image?: string;
-  imageUrl?: string;
-  description: string;
-  link: string;
-};
 
 const Sustainability = ({ items }: { items?: SustainabilityItem[] }) => {
   const list = items?.length ? items : defaultSustainabilityItems;

@@ -30,15 +30,63 @@ export type HomepageData = {
 export type SisterConcernItem = {
   id: string;
   name: string;
-  imageUrl: string;
+  slug: string;
+  thumbnailUrl: string;
   description: string;
   link: string;
+  establishedYear: string;
+  location: string;
+  capacity: string;
+  personnel: string;
+  yearsInOperation: number;
+  totalMachines: string;
+  factoryPhotos: string[];
 };
+
+function normalizeSisterConcern(item: Record<string, unknown>): SisterConcernItem {
+  const id = String(item.id || '');
+  const name = String(item.name || '');
+  const slug = String(item.slug || '') || name.toLowerCase().trim().replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-');
+  const thumbnailUrl = String(item.thumbnailUrl || item.imageUrl || '');
+  const establishedYear = String(item.establishedYear || '');
+  const currentYear = new Date().getFullYear();
+  const yearsFromYear = establishedYear ? currentYear - Number(establishedYear) : 0;
+  const yearsInOperation = Number(item.yearsInOperation || yearsFromYear || 0);
+
+  return {
+    id,
+    name,
+    slug,
+    thumbnailUrl,
+    description: String(item.description || ''),
+    link: String(item.link || `/sister-concerns/${slug}`),
+    establishedYear,
+    location: String(item.location || ''),
+    capacity: String(item.capacity || ''),
+    personnel: String(item.personnel || ''),
+    yearsInOperation: Number.isFinite(yearsInOperation) ? yearsInOperation : 0,
+    totalMachines: String(item.totalMachines || ''),
+    factoryPhotos: Array.isArray(item.factoryPhotos)
+      ? item.factoryPhotos.filter((photo): photo is string => typeof photo === 'string')
+      : [],
+  };
+}
 
 export type ProductItem = {
   id: string;
+  categoryId: string;
+  categoryName?: string;
   name: string;
+  description: string;
   imageUrl: string;
+  addToHome: boolean;
+};
+
+export type ProductCategory = {
+  id: string;
+  name: string;
+  slug: string;
+  products: ProductItem[];
 };
 
 export type CertificationItem = {
@@ -51,6 +99,13 @@ export type ClientItem = {
   id: string;
   name: string;
   logoUrl: string;
+};
+
+export type ClientStats = {
+  totalClients: number;
+  countriesServed: string;
+  yearsServed: string;
+  satisfactionPercentage: string;
 };
 
 export type NewsItem = {
@@ -73,21 +128,117 @@ export async function getHomepage() {
 export async function getSisterConcerns() {
   const db = await getDb();
   const docs = await db
-    .collection<Omit<SisterConcernItem, 'id'> & { _id: ObjectId }>('sisterConcerns')
+    .collection<Record<string, unknown> & { _id: ObjectId }>('sisterConcerns')
     .find({})
     .sort({ order: 1, createdAt: 1 })
     .toArray();
-  return docs.map(mapId);
+  return docs.map((doc) => normalizeSisterConcern(mapId(doc) as Record<string, unknown>));
+}
+
+export async function getSisterConcernBySlug(slug: string) {
+  const db = await getDb();
+  const doc = await db
+    .collection<Record<string, unknown> & { _id: ObjectId }>('sisterConcerns')
+    .findOne({ $or: [{ slug }, { link: `/sister-concerns/${slug}` }] });
+
+  if (!doc) {
+    return null;
+  }
+
+  return normalizeSisterConcern(mapId(doc) as Record<string, unknown>);
 }
 
 export async function getProducts() {
+  const categories = await getProductCategories();
+  return categories.flatMap((category) => category.products);
+}
+
+function makeSlug(value: string) {
+  return value
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-');
+}
+
+export async function getProductCategories() {
   const db = await getDb();
-  const docs = await db
-    .collection<Omit<ProductItem, 'id'> & { _id: ObjectId }>('products')
+  const categoryDocs = await db
+    .collection<{ _id: ObjectId; name: string }>('productCategories')
     .find({})
     .sort({ order: 1, createdAt: 1 })
     .toArray();
-  return docs.map(mapId);
+
+  const categories = categoryDocs.map((doc) => ({
+    id: doc._id.toString(),
+    name: String(doc.name || ''),
+    slug: makeSlug(String(doc.name || 'category')),
+    products: [] as ProductItem[],
+  }));
+
+  const categoryMap = new Map(categories.map((category) => [category.id, category]));
+
+  const productDocs = await db
+    .collection<{
+      _id: ObjectId;
+      categoryId?: string;
+      name?: string;
+      description?: string;
+      imageUrl?: string;
+      addToHome?: boolean;
+    }>('products')
+    .find({})
+    .sort({ createdAt: 1 })
+    .toArray();
+
+  for (const product of productDocs) {
+    const categoryId = String(product.categoryId || '');
+    const category = categoryMap.get(categoryId);
+
+    if (!category) {
+      continue;
+    }
+
+    category.products.push({
+      id: product._id.toString(),
+      categoryId,
+      categoryName: category.name,
+      name: String(product.name || ''),
+      description: String(product.description || ''),
+      imageUrl: String(product.imageUrl || ''),
+      addToHome: Boolean(product.addToHome),
+    });
+  }
+
+  const uncategorized = productDocs.filter((product) => {
+    const categoryId = String(product.categoryId || '');
+    return !categoryMap.has(categoryId);
+  });
+
+  if (uncategorized.length > 0) {
+    categories.push({
+      id: 'uncategorized',
+      name: 'Uncategorized',
+      slug: 'uncategorized',
+      products: uncategorized.map((product) => ({
+        id: product._id.toString(),
+        categoryId: 'uncategorized',
+        categoryName: 'Uncategorized',
+        name: String(product.name || ''),
+        description: String(product.description || ''),
+        imageUrl: String(product.imageUrl || ''),
+        addToHome: Boolean(product.addToHome),
+      })),
+    });
+  }
+
+  return categories;
+}
+
+export async function getHomeProducts() {
+  const products = await getProducts();
+  return products.filter((product) => product.addToHome);
 }
 
 export async function getCertifications() {
@@ -108,6 +259,27 @@ export async function getClients() {
     .sort({ order: 1, createdAt: 1 })
     .toArray();
   return docs.map(mapId);
+}
+
+export async function getClientStats(): Promise<ClientStats> {
+  const db = await getDb();
+
+  const [clients, statsDoc] = await Promise.all([
+    db.collection<Omit<ClientItem, 'id'> & { _id: ObjectId }>('clients').countDocuments({}),
+    db.collection<{
+      _id: string;
+      countriesServed?: string;
+      yearsServed?: string;
+      satisfactionPercentage?: string;
+    }>('settings').findOne({ _id: 'clientStats' }),
+  ]);
+
+  return {
+    totalClients: clients,
+    countriesServed: String(statsDoc?.countriesServed || ''),
+    yearsServed: String(statsDoc?.yearsServed || ''),
+    satisfactionPercentage: String(statsDoc?.satisfactionPercentage || ''),
+  };
 }
 
 export async function getNews() {

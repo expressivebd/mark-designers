@@ -75,17 +75,21 @@ function RootContent({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const isAdminRoute = pathname?.startsWith('/admin');
 
+  if (isAdminRoute) {
+    return <main className="overflow-x-hidden">{children}</main>;
+  }
+
   return (
     <>
       {isLoading && <Loader onLoadingComplete={() => setIsLoading(false)} />}
       
       {!isLoading && (
         <>
-          {!isAdminRoute && <Header />}
-          <main className={isAdminRoute ? 'min-h-screen bg-slate-50' : 'overflow-x-hidden'}>
+          <Header />
+          <main className="overflow-x-hidden">
             {children}
           </main>
-          {!isAdminRoute && <Footer />}
+          <Footer />
         </>
       )}
     </>

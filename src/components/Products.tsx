@@ -5,65 +5,66 @@ import { useInView } from 'react-intersection-observer';
 import Link from 'next/link';
 import Image from 'next/image';
 
-const defaultProducts = [
+type ProductItem = {
+  id?: string;
+  name: string;
+  description?: string;
+  imageUrl: string;
+};
+
+const defaultProducts: ProductItem[] = [
   {
     name: 'T-Shirts',
-    image: "/products/1.png",
+    imageUrl: '/products/1.png',
   },
   {
     name: 'Polo Shirts',
-    image: '/products/2.png',
+    imageUrl: '/products/2.png',
   },
   {
     name: 'Dress Shirts',
-    image: '/products/3.png',
+    imageUrl: '/products/3.png',
   },
   {
     name: 'Hoodies',
-    image: '/products/4.png',
+    imageUrl: '/products/4.png',
   },
   {
     name: 'Jackets',
-    image: '/products/4.png',
+    imageUrl: '/products/4.png',
   },
   {
     name: 'Sweaters',
-    image: '/products/3.png',
+    imageUrl: '/products/3.png',
   },
   {
     name: 'Trousers',
-    image: '/products/2.png',
+    imageUrl: '/products/2.png',
   },
   {
     name: 'Jeans',
-    image: '/products/1.png',
+    imageUrl: '/products/1.png',
   },
   {
     name: 'Shorts',
-    image: '/products/1.png',
+    imageUrl: '/products/1.png',
   },
   {
     name: 'Activewear',
-    image: '/products/2.png',
+    imageUrl: '/products/2.png',
   },
   {
     name: 'Formal Wear',
-    image: '/products/3.png',
+    imageUrl: '/products/3.png',
   },
   {
     name: 'Casual Wear',
-    image: '/products/4.png',
+    imageUrl: '/products/4.png',
   },
 ];
 
-type ProductItem = {
-  name: string;
-  image?: string;
-  imageUrl?: string;
-};
-
 const Products = ({ items }: { items?: ProductItem[] }) => {
-  const list = items?.length ? items : defaultProducts;
+  const list = items || defaultProducts;
   const displayProducts = list.slice(0, 12);
   const [ref, inView] = useInView({
     triggerOnce: true,
@@ -99,7 +100,7 @@ const Products = ({ items }: { items?: ProductItem[] }) => {
                 {/* Product Image - 1:1 Aspect Ratio */}
                 <div className="relative aspect-square overflow-hidden bg-blue-200">
                   <Image
-                    src={product.imageUrl || product.image || '/products/1.png'}
+                    src={product.imageUrl || '/products/1.png'}
                     alt={product.name}
                     width={400}
                     height={400}
@@ -117,6 +118,7 @@ const Products = ({ items }: { items?: ProductItem[] }) => {
                   <h3 className="text-lg md:text-xl font-playfair font-semibold text-primary group-hover:text-accent transition-colors duration-300">
                     {product.name}
                   </h3>
+                  <p className="mt-2 text-sm text-gray-600">{product.description || 'Premium quality product.'}</p>
                 </div>
               </div>
             </motion.div>

@@ -2,7 +2,6 @@
 
 import { motion } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
-import CountUp from 'react-countup';
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -14,7 +13,7 @@ interface ConcernData {
     established: string;
     heroImage: string;
     description: string[];
-    stats: { number: number; suffix: string; label: string }[];
+    stats: { value: string; label: string }[];
     machineryImages: { src: string; alt: string; description: string }[];
 }
 
@@ -97,9 +96,7 @@ export default function SisterConcernDetail({ data }: { data: ConcernData }) {
                                 className="text-center"
                             >
                                 <div className="text-4xl md:text-5xl lg:text-6xl font-playfair font-bold text-accent mb-2">
-                                    {statsInView && (
-                                        <CountUp end={stat.number} duration={2.5} separator="," suffix={stat.suffix} />
-                                    )}
+                                    {stat.value}
                                 </div>
                                 <p className="text-white/80 font-medium text-sm md:text-base">{stat.label}</p>
                             </motion.div>
@@ -139,13 +136,21 @@ export default function SisterConcernDetail({ data }: { data: ConcernData }) {
                                     <h4 className="text-white font-playfair font-bold text-lg md:text-xl opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-4 group-hover:translate-y-0 text-center">
                                         {img.alt}
                                     </h4>
-                                    <p className="text-white/80 text-sm mt-2 opacity-0 group-hover:opacity-100 transition-all duration-300 delay-100 translate-y-4 group-hover:translate-y-0 text-center max-w-xs">
-                                        {img.description}
-                                    </p>
+                                    {img.description && (
+                                        <p className="text-white/80 text-sm mt-2 opacity-0 group-hover:opacity-100 transition-all duration-300 delay-100 translate-y-4 group-hover:translate-y-0 text-center max-w-xs">
+                                            {img.description}
+                                        </p>
+                                    )}
                                 </div>
                             </div>
                         ))}
                     </motion.div>
+
+                    {data.machineryImages.length === 0 && (
+                        <div className="rounded-xl border border-dashed border-slate-300 py-10 text-center text-slate-500">
+                            Factory photos are not available yet.
+                        </div>
+                    )}
                 </div>
             </section>
 

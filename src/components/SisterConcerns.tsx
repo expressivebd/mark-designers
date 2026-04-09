@@ -8,8 +8,8 @@ import Image from 'next/image';
 type SisterConcernItem = {
   id?: string;
   name: string;
+  thumbnailUrl?: string;
   image?: string;
-  imageUrl?: string;
   description: string;
   link?: string;
 };
@@ -72,7 +72,7 @@ const SisterConcerns = ({ items }: { items?: SisterConcernItem[] }) => {
                 {/* Image */}
                 <div className="relative h-[60%] overflow-hidden">
                   <Image
-                    src={concern.imageUrl || concern.image || '/p1.jpg'}
+                    src={concern.thumbnailUrl || concern.image || '/p1.jpg'}
                     alt={concern.name}
                     width={600}
                     height={800}
@@ -87,7 +87,7 @@ const SisterConcerns = ({ items }: { items?: SisterConcernItem[] }) => {
                     <h3 className="text-2xl md:text-3xl font-playfair font-bold text-primary mb-4 group-hover:text-accent transition-colors duration-300">
                       {concern.name}
                     </h3>
-                    <p className="text-gray-600 leading-relaxed">
+                    <p className="text-gray-600 leading-relaxed line-clamp-2">
                       {concern.description}
                     </p>
                   </div>

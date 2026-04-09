@@ -49,7 +49,7 @@ const UploadField = ({ label, value, onChange, folder, accept }: UploadFieldProp
       <div className="flex items-center gap-4">
         <input
           type="file"
-          accept={accept}
+          accept={accept || '.jpg,.jpeg,.png,image/jpeg,image/png'}
           onChange={(event) => {
             const file = event.target.files?.[0];
             if (file) {

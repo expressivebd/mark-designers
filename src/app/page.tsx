@@ -10,7 +10,7 @@ import CallToAction from '@/components/CallToAction';
 import {
   getHomepage,
   getSisterConcerns,
-  getProducts,
+  getHomeProducts,
   getCertifications,
   getClients,
   getNews,
@@ -20,7 +20,7 @@ export default async function Home() {
   const [homepage, sisterConcerns, products, certifications, clients, news] = await Promise.all([
     getHomepage(),
     getSisterConcerns(),
-    getProducts(),
+    getHomeProducts(),
     getCertifications(),
     getClients(),
     getNews(),

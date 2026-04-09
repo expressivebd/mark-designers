@@ -1,207 +1,82 @@
-'use client';
-
-import { motion } from 'framer-motion';
-import { useInView } from 'react-intersection-observer';
 import Image from 'next/image';
-import { useState } from 'react';
 import SEOHead from '@/components/SEOHead';
+import { getProductCategories } from '@/lib/data';
 
-interface Product {
-    name: string;
-    description: string;
-    image: string;
-    height: string;
-}
+export default async function ProductsPage() {
+  const categories = await getProductCategories();
+  const visibleCategories = categories.filter((category) => category.products.length > 0);
 
-interface ProductGroup {
-    id: string;
-    title: string;
-    subtitle: string;
-    products: Product[];
-}
+  return (
+    <>
+      <SEOHead
+        title="Products"
+        description="Explore our category-based product collections from Mark Designers."
+        keywords="products, categories, garments, mark designers"
+      />
 
-const productGroups: ProductGroup[] = [
-    {
-        id: 'tops',
-        title: 'Tops',
-        subtitle: 'T-Shirts, Polo Shirts & Casual Tops',
-        products: [
-            { name: 'Crew Neck T-Shirt', description: 'Classic cotton crew neck in various fits', image: '/products/1.png', height: 'h-[300px] md:h-[380px]' },
-            { name: 'Polo Shirt', description: 'Premium pique polo with embroidered details', image: '/products/2.png', height: 'h-[350px] md:h-[420px]' },
-            { name: 'V-Neck T-Shirt', description: 'Slim-fit V-neck in soft jersey fabric', image: '/products/3.png', height: 'h-[280px] md:h-[350px]' },
-            { name: 'Henley', description: 'Button placket henley in waffle knit', image: '/products/4.png', height: 'h-[320px] md:h-[400px]' },
-            { name: 'Tank Top', description: 'Relaxed fit tank for warm weather', image: '/products/1.png', height: 'h-[260px] md:h-[320px]' },
-            { name: 'Long Sleeve Tee', description: 'Essential long sleeve in organic cotton', image: '/products/2.png', height: 'h-[340px] md:h-[390px]' },
-        ],
-    },
-    {
-        id: 'outerwear',
-        title: 'Outerwear',
-        subtitle: 'Hoodies, Jackets & Sweaters',
-        products: [
-            { name: 'Pullover Hoodie', description: 'Brushed fleece pullover with kangaroo pocket', image: '/products/4.png', height: 'h-[360px] md:h-[430px]' },
-            { name: 'Zip-Up Jacket', description: 'Lightweight zip jacket with DWR coating', image: '/products/3.png', height: 'h-[300px] md:h-[370px]' },
-            { name: 'Bomber Jacket', description: 'Classic bomber with ribbed cuffs and hem', image: '/products/2.png', height: 'h-[340px] md:h-[410px]' },
-            { name: 'Crewneck Sweater', description: 'Fine gauge knit sweater in merino blend', image: '/products/1.png', height: 'h-[280px] md:h-[350px]' },
-            { name: 'Windbreaker', description: 'Packable windbreaker with reflective details', image: '/products/4.png', height: 'h-[320px] md:h-[380px]' },
-            { name: 'Cardigan', description: 'Chunky knit cardigan with shawl collar', image: '/products/3.png', height: 'h-[350px] md:h-[420px]' },
-        ],
-    },
-    {
-        id: 'bottoms',
-        title: 'Bottoms',
-        subtitle: 'Trousers, Jeans & Shorts',
-        products: [
-            { name: 'Chino Trousers', description: 'Tailored chinos in stretch cotton twill', image: '/products/2.png', height: 'h-[340px] md:h-[410px]' },
-            { name: 'Denim Jeans', description: 'Premium selvedge denim in classic fits', image: '/products/1.png', height: 'h-[360px] md:h-[440px]' },
-            { name: 'Cargo Shorts', description: 'Utility cargo shorts with reinforced pockets', image: '/products/4.png', height: 'h-[280px] md:h-[340px]' },
-            { name: 'Jogger Pants', description: 'Technical joggers with tapered leg', image: '/products/3.png', height: 'h-[320px] md:h-[380px]' },
-            { name: 'Bermuda Shorts', description: 'Classic bermuda in performance fabric', image: '/products/2.png', height: 'h-[260px] md:h-[320px]' },
-        ],
-    },
-    {
-        id: 'specialty',
-        title: 'Specialty',
-        subtitle: 'Activewear, Formal & Casual Collections',
-        products: [
-            { name: 'Performance Tee', description: 'Moisture-wicking athletic top', image: '/products/3.png', height: 'h-[300px] md:h-[370px]' },
-            { name: 'Dress Shirt', description: 'Non-iron dress shirt in fine poplin', image: '/products/1.png', height: 'h-[350px] md:h-[420px]' },
-            { name: 'Sports Jacket', description: 'Breathable sports jacket with ventilation', image: '/products/4.png', height: 'h-[330px] md:h-[400px]' },
-            { name: 'Linen Shirt', description: 'Relaxed linen shirt for summer', image: '/products/2.png', height: 'h-[290px] md:h-[360px]' },
-            { name: 'Track Pants', description: 'Athletic track pants with side stripes', image: '/products/3.png', height: 'h-[340px] md:h-[400px]' },
-            { name: 'Blazer', description: 'Unstructured blazer in textured fabric', image: '/products/4.png', height: 'h-[360px] md:h-[430px]' },
-        ],
-    },
-];
-
-function ProductCard({ product }: { product: Product }) {
-    const [isActive, setIsActive] = useState(false);
-
-    return (
-        <div
-            className={`masonry-item relative rounded-xl overflow-hidden group cursor-pointer ${product.height}`}
-            onMouseEnter={() => setIsActive(true)}
-            onMouseLeave={() => setIsActive(false)}
-            onClick={() => setIsActive(!isActive)}
-        >
-            <Image
-                src={product.image}
-                alt={product.name}
-                fill
-                className="object-cover group-hover:scale-110 transition-transform duration-700"
-                sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
-            />
-
-            {/* Dark Overlay + Content on Hover/Click */}
-            <div
-                className="absolute inset-0 flex flex-col justify-end p-4 md:p-6 transition-all duration-400"
-                style={{
-                    background: isActive
-                        ? 'linear-gradient(to top, rgba(26,35,50,0.9) 0%, rgba(26,35,50,0.6) 50%, rgba(26,35,50,0.3) 100%)'
-                        : 'transparent',
-                }}
-            >
-                <div
-                    className="transition-all duration-400"
-                    style={{
-                        transform: isActive ? 'translateY(0)' : 'translateY(20px)',
-                        opacity: isActive ? 1 : 0,
-                    }}
-                >
-                    <h3 className="text-white text-lg md:text-xl font-playfair font-bold mb-1">
-                        {product.name}
-                    </h3>
-                    <p className="text-white/80 text-sm leading-relaxed">
-                        {product.description}
-                    </p>
-                </div>
-            </div>
+      <section className="relative h-[45vh] md:h-[56vh] overflow-hidden">
+        <Image src="/p3.jpg" alt="Our Products" fill priority className="object-cover" />
+        <div className="absolute inset-0 bg-black/55" />
+        <div className="relative z-10 flex h-full items-center justify-center px-4 text-center">
+          <div>
+            <h1 className="text-4xl font-bold text-white md:text-6xl lg:text-7xl">Our Products</h1>
+            <p className="mx-auto mt-4 max-w-2xl text-sm text-white/85 md:text-lg">
+              Browse all product categories and discover complete collections.
+            </p>
+          </div>
         </div>
-    );
-}
+      </section>
 
-export default function ProductsPage() {
-    const [heroRef, heroInView] = useInView({ triggerOnce: true, threshold: 0.1 });
-
-    return (
-        <>
-            <SEOHead
-                title="Products"
-                description="Explore our premium garment collections — T-Shirts, Polo Shirts, Hoodies, Jackets, Jeans, Activewear, and more. Crafted with precision at Mark Designers."
-                keywords="garment products, t-shirts, polo shirts, hoodies, jackets, Bangladesh manufacturer"
-            />
-            <section className="relative h-[50vh] md:h-[60vh] flex items-center justify-center overflow-hidden">
-                <Image src="/p3.jpg" alt="Our Products" fill className="object-cover" priority />
-                <div className="absolute inset-0 bg-black/50" />
-                <motion.div
-                    initial={{ opacity: 0, y: 40 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.8, delay: 0.2 }}
-                    className="relative z-10 text-center"
-                >
-                    <h1 className="text-4xl md:text-6xl lg:text-8xl font-playfair font-bold text-white">
-                        OUR PRODUCTS
-                    </h1>
-                    <div className="w-24 h-1 bg-accent mx-auto mt-6" />
-                    <p className="text-white/80 mt-6 text-lg md:text-xl font-light max-w-2xl mx-auto">
-                        Premium garments crafted with precision and passion
-                    </p>
-                </motion.div>
-            </section>
-
-            {/* Quick Navigation */}
-            <section className="sticky top-0 z-40 bg-white/90 backdrop-blur-md shadow-sm border-b border-gray-100">
-                <div className="container-custom">
-                    <nav className="flex items-center gap-2 py-4 overflow-x-auto hide-scrollbar">
-                        {productGroups.map((group) => (
-                            <a
-                                key={group.id}
-                                href={`#${group.id}`}
-                                className="flex-shrink-0 px-5 py-2.5 rounded-full text-sm font-medium text-primary hover:bg-primary hover:text-white transition-all duration-300 border border-gray-200 hover:border-primary"
-                            >
-                                {group.title}
-                            </a>
-                        ))}
-                    </nav>
-                </div>
-            </section>
-
-            {/* Product Groups */}
-            {productGroups.map((group, groupIndex) => (
-                <section
-                    key={group.id}
-                    id={group.id}
-                    className={`section-padding ${groupIndex % 2 === 0 ? 'bg-white' : 'bg-slate-50'}`}
-                >
-                    <div className="container-custom">
-                        <motion.div
-                            initial={{ opacity: 0, y: 30 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ duration: 0.6 }}
-                            className="text-center mb-12"
-                        >
-                            <h2 className="heading-secondary">{group.title}</h2>
-                            <p className="text-gray-500 mt-2 text-lg">{group.subtitle}</p>
-                            <div className="w-16 h-1 bg-accent mx-auto mt-4" />
-                        </motion.div>
-
-                        <div className="masonry-grid">
-                            {group.products.map((product, index) => (
-                                <motion.div
-                                    key={index}
-                                    initial={{ opacity: 0, y: 20 }}
-                                    whileInView={{ opacity: 1, y: 0 }}
-                                    viewport={{ once: true }}
-                                    transition={{ duration: 0.4, delay: index * 0.05 }}
-                                >
-                                    <ProductCard product={product} />
-                                </motion.div>
-                            ))}
-                        </div>
-                    </div>
-                </section>
+      <section className="sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur">
+        <div className="container-custom py-4">
+          <div className="hide-scrollbar flex items-center gap-2 overflow-x-auto">
+            {visibleCategories.map((category) => (
+              <a
+                key={category.id}
+                href={`#${category.slug}`}
+                className="whitespace-nowrap rounded-full border border-slate-300 px-4 py-2 text-sm font-medium text-primary transition hover:border-primary hover:bg-primary hover:text-white"
+              >
+                {category.name}
+              </a>
             ))}
-        </>
-    );
+          </div>
+        </div>
+      </section>
+
+      {visibleCategories.map((category, index) => (
+        <section
+          key={category.id}
+          id={category.slug}
+          className={`section-padding ${index % 2 === 0 ? 'bg-white' : 'bg-slate-50'}`}
+        >
+          <div className="container-custom">
+            <div className="mb-10 text-center">
+              <h2 className="heading-secondary mb-2">{category.name}</h2>
+              <div className="mx-auto h-1 w-16 bg-accent" />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4 md:gap-6 lg:grid-cols-4">
+              {category.products.map((product) => (
+                <article key={product.id} className="card overflow-hidden">
+                  <div className="relative aspect-square overflow-hidden bg-blue-200">
+                    <Image
+                      src={product.imageUrl || '/products/1.png'}
+                      alt={product.name}
+                      fill
+                      className="object-cover"
+                      sizes="(max-width: 1024px) 50vw, 25vw"
+                    />
+                  </div>
+                  <div className="p-4 text-center">
+                    <h3 className="text-lg md:text-xl font-playfair font-semibold text-primary">{product.name}</h3>
+                    <p className="mt-2 text-sm text-gray-600">{product.description}</p>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
+      ))}
+    </>
+  );
 }

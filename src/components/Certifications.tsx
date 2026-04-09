@@ -5,7 +5,13 @@ import { useInView } from 'react-intersection-observer';
 import Image from 'next/image';
 import { useState } from 'react';
 
-const defaultCertifications = [
+type CertificationItem = {
+  name: string;
+  logo?: string;
+  logoUrl?: string;
+};
+
+const defaultCertifications: CertificationItem[] = [
   { name: 'ISO 9001', logo: '/certificates/1.png' },
   { name: 'WRAP', logo: '/certificates/2.png' },
   { name: 'BSCI', logo: '/certificates/3.png' },
@@ -19,12 +25,6 @@ const defaultCertifications = [
   { name: 'GOTS', logo: '/certificates/11.png' },
   { name: 'GOTS', logo: '/certificates/12.png' },
 ];
-
-type CertificationItem = {
-  name: string;
-  logo?: string;
-  logoUrl?: string;
-};
 
 const Certifications = ({ items }: { items?: CertificationItem[] }) => {
   const list = items?.length ? items : defaultCertifications;
@@ -81,7 +81,8 @@ const Certifications = ({ items }: { items?: CertificationItem[] }) => {
             {duplicatedCertifications.map((cert, index) => (
               <div
                 key={index}
-                className="flex-shrink-0 w-[200px] h-[120px] bg-white rounded-sm shadow-md hover:shadow-xl transition-all duration-300 flex items-center justify-center p-6 hover:scale-105"
+                className="flex-shrink-0 w-[200px] h-[120px] bg-white rounded-sm shadow-md hover:shadow-xl transition-all duration-300 flex cursor-pointer items-center justify-center p-6 hover:scale-105"
+                title={cert.name}
               >
                   <Image
                     src={cert.logoUrl || cert.logo || '/certificates/1.png'}

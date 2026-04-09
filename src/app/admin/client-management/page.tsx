@@ -1,5 +1,5 @@
 import AdminPageHeader from '@/components/admin/AdminPageHeader';
-import CollectionManager from '@/components/admin/CollectionManager';
+import ClientManager from '@/components/admin/ClientManager';
 
 export default function ClientManagementAdmin() {
   return (
@@ -8,15 +8,7 @@ export default function ClientManagementAdmin() {
         title="Client Management"
         description="Manage client and partner logos."
       />
-      <CollectionManager
-        title="Client"
-        endpoint="/api/admin/clients"
-        folder="clients"
-        fields={[
-          { name: 'name', label: 'Name', type: 'text' },
-          { name: 'logoUrl', label: 'Logo', type: 'image' },
-        ]}
-      />
+      <ClientManager />
     </div>
   );
 }

@@ -8,6 +8,13 @@ function mapId(doc: Record<string, unknown>) {
   return { id: _id.toString(), ...rest };
 }
 
+type ClientStatsDoc = {
+  _id: string;
+  countriesServed?: string;
+  yearsServed?: string;
+  satisfactionPercentage?: string;
+};
+
 export async function GET() {
   const session = await requireAdmin();
   if (!session) {
@@ -15,8 +22,22 @@ export async function GET() {
   }
 
   const db = await getDb();
-  const docs = await db.collection('clients').find({}).sort({ order: 1, createdAt: 1 }).toArray();
-  return NextResponse.json(docs.map(mapId));
+  const [docs, statsDoc] = await Promise.all([
+    db.collection('clients').find({}).sort({ order: 1, createdAt: 1 }).toArray(),
+    db.collection<ClientStatsDoc>('settings').findOne({ _id: 'clientStats' }),
+  ]);
+
+  const items = docs.map(mapId);
+
+  return NextResponse.json({
+    items,
+    stats: {
+      totalClients: items.length,
+      countriesServed: String(statsDoc?.countriesServed || ''),
+      yearsServed: String(statsDoc?.yearsServed || ''),
+      satisfactionPercentage: String(statsDoc?.satisfactionPercentage || ''),
+    },
+  });
 }
 
 export async function POST(request: Request) {
@@ -45,11 +66,33 @@ export async function PUT(request: Request) {
   }
 
   const payload = await request.json();
+
+  const db = await getDb();
+
+  if (payload?.action === 'updateStats') {
+    await db.collection('settings').updateOne(
+      { _id: 'clientStats' },
+      {
+        $set: {
+          countriesServed: String(payload?.countriesServed || '').trim(),
+          yearsServed: String(payload?.yearsServed || '').trim(),
+          satisfactionPercentage: String(payload?.satisfactionPercentage || '').trim(),
+          updatedAt: new Date(),
+        },
+        $setOnInsert: {
+          createdAt: new Date(),
+        },
+      },
+      { upsert: true }
+    );
+
+    return NextResponse.json({ ok: true });
+  }
+
   if (!payload?.id) {
     return NextResponse.json({ error: 'ID is required' }, { status: 400 });
   }
 
-  const db = await getDb();
   await db.collection('clients').updateOne(
     { _id: new ObjectId(payload.id) },
     {
