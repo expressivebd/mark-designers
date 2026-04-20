@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import SEOHead from '@/components/SEOHead';
 import { getProductCategories } from '@/lib/data';
+import ProductGrid from '@/components/ProductGrid';
 
 export default async function ProductsPage() {
   const categories = await getProductCategories();
@@ -55,28 +56,11 @@ export default async function ProductsPage() {
               <div className="mx-auto h-1 w-16 bg-accent" />
             </div>
 
-            <div className="grid grid-cols-2 gap-4 md:gap-6 lg:grid-cols-4">
-              {category.products.map((product) => (
-                <article key={product.id} className="card overflow-hidden">
-                  <div className="relative aspect-square overflow-hidden bg-blue-200">
-                    <Image
-                      src={product.imageUrl || '/products/1.png'}
-                      alt={product.name}
-                      fill
-                      className="object-cover"
-                      sizes="(max-width: 1024px) 50vw, 25vw"
-                    />
-                  </div>
-                  <div className="p-4 text-center">
-                    <h3 className="text-lg md:text-xl font-playfair font-semibold text-primary">{product.name}</h3>
-                    <p className="mt-2 text-sm text-gray-600">{product.description}</p>
-                  </div>
-                </article>
-              ))}
-            </div>
+            <ProductGrid products={category.products} />
           </div>
         </section>
       ))}
     </>
   );
 }
+

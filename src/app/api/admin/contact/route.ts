@@ -8,14 +8,18 @@ function mapId(doc: Record<string, unknown>) {
   return { id: _id.toString(), ...rest };
 }
 
-function generateEmbedUrl(location: string) {
-  const query = location.trim();
-  return query ? `https://www.google.com/maps?q=${encodeURIComponent(query)}&output=embed` : '';
-}
-
-function generateDirectionUrl(location: string) {
-  const query = location.trim();
-  return query ? `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(query)}` : '';
+function isGoogleMapsUrl(value: string): boolean {
+  try {
+    const url = new URL(value);
+    return (
+      url.hostname === 'maps.app.goo.gl' ||
+      url.hostname === 'goo.gl' ||
+      (url.hostname === 'www.google.com' && url.pathname.startsWith('/maps')) ||
+      (url.hostname === 'google.com' && url.pathname.startsWith('/maps'))
+    );
+  } catch {
+    return false;
+  }
 }
 
 function normalizePayload(payload: Record<string, unknown>) {
@@ -35,15 +39,23 @@ function normalizePayload(payload: Record<string, unknown>) {
         .filter(Boolean)
     : [];
 
-  return {
-    title,
-    fullAddress,
-    phones,
-    emails,
-    mapLocation,
-    mapEmbedUrl: generateEmbedUrl(mapLocation),
-    directionUrl: generateDirectionUrl(mapLocation),
-  };
+  // Embed: always derive from plain-text fullAddress — geocoding is reliable and needs no network call
+  const addrForEmbed = fullAddress || (mapLocation && !isGoogleMapsUrl(mapLocation) ? mapLocation : '');
+  const mapEmbedUrl = addrForEmbed
+    ? `https://maps.google.com/maps?q=${encodeURIComponent(addrForEmbed)}&output=embed`
+    : '';
+
+  // Direction: the share link opens the exact pinned location in Google Maps (browsers follow the redirect)
+  let directionUrl = '';
+  if (mapLocation && isGoogleMapsUrl(mapLocation)) {
+    directionUrl = mapLocation;
+  } else if (fullAddress) {
+    directionUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(fullAddress)}`;
+  } else if (mapLocation) {
+    directionUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(mapLocation)}`;
+  }
+
+  return { title, fullAddress, phones, emails, mapLocation, mapEmbedUrl, directionUrl };
 }
 
 export async function GET() {

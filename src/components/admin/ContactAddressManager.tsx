@@ -38,15 +38,33 @@ function normalizeEmails(values: string[]) {
   return values.map((value) => value.trim()).filter(Boolean);
 }
 
+function isGoogleMapsUrl(value: string): boolean {
+  try {
+    const url = new URL(value);
+    return (
+      url.hostname === 'maps.app.goo.gl' ||
+      url.hostname === 'goo.gl' ||
+      (url.hostname === 'www.google.com' && url.pathname.startsWith('/maps')) ||
+      (url.hostname === 'google.com' && url.pathname.startsWith('/maps'))
+    );
+  } catch {
+    return false;
+  }
+}
+
 function buildEmbedUrl(location: string) {
   const query = location.trim();
-  return query ? `https://www.google.com/maps?q=${encodeURIComponent(query)}&output=embed` : '';
+  if (!query || isGoogleMapsUrl(query)) return ''; // Google Maps URLs can't be embedded directly
+  return `https://maps.google.com/maps?q=${encodeURIComponent(query)}&output=embed`;
 }
 
 function buildDirectionUrl(location: string) {
   const query = location.trim();
-  return query ? `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(query)}` : '';
+  if (!query) return '';
+  if (isGoogleMapsUrl(query)) return query; // share link works for directions
+  return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(query)}`;
 }
+
 
 export default function ContactAddressManager() {
   const [items, setItems] = useState<ContactAddressItem[]>([]);
@@ -57,6 +75,9 @@ export default function ContactAddressManager() {
   const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState<ContactAddressForm>(emptyForm());
   const [deleteTarget, setDeleteTarget] = useState<ContactAddressItem | null>(null);
+  // Resolved embed URLs for the form preview
+  const [previewEmbed, setPreviewEmbed] = useState<{ embedUrl: string; directionUrl: string } | null>(null);
+  const [isResolvingPreview, setIsResolvingPreview] = useState(false);
 
   const formMapLocation = useMemo(() => form.mapLocation || form.fullAddress, [form.mapLocation, form.fullAddress]);
 
@@ -82,6 +103,33 @@ export default function ContactAddressManager() {
   useEffect(() => {
     loadItems();
   }, [loadItems]);
+
+  // Resolve Google Maps URLs for live preview whenever the location field changes
+  useEffect(() => {
+    const addr = form.fullAddress.trim() || form.mapLocation.trim();
+    const mapsUrl = form.mapLocation.trim();
+
+    // Embed: use plain-text address for reliable geocoding
+    const addrForEmbed = form.fullAddress.trim() || (!isGoogleMapsUrl(mapsUrl) ? mapsUrl : '');
+    const embedUrl = addrForEmbed
+      ? buildEmbedUrl(addrForEmbed)
+      : '';
+
+    // Direction: share link (or address fallback)
+    const directionUrl = mapsUrl && isGoogleMapsUrl(mapsUrl)
+      ? mapsUrl
+      : addr
+      ? buildDirectionUrl(addr)
+      : '';
+
+    if (embedUrl || directionUrl) {
+      setPreviewEmbed({ embedUrl, directionUrl });
+    } else {
+      setPreviewEmbed(null);
+    }
+    setIsResolvingPreview(false);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [form.fullAddress, form.mapLocation]);
 
   const openCreateForm = () => {
     setEditId(null);
@@ -414,33 +462,48 @@ export default function ContactAddressManager() {
                   onChange={(event) => setForm((prev) => ({ ...prev, mapLocation: event.target.value }))}
                   className="w-full rounded-sm border border-slate-200 px-3 py-2 text-sm"
                   rows={3}
-                  placeholder="Enter a place name or full address to generate the map embed"
+                  placeholder="Paste a Google Maps share link (e.g. https://maps.app.goo.gl/...) or enter a place name / address"
                 />
+                <p className="text-xs text-gray-500">You can paste a Google Maps short link (maps.app.goo.gl), a full Google Maps URL, or just type a place name or address.</p>
               </div>
 
               {formMapLocation && (
                 <div className="md:col-span-2 rounded-lg border border-slate-200 p-4 space-y-3">
                   <p className="text-sm font-semibold text-primary">Map Preview</p>
                   <div className="relative h-64 w-full overflow-hidden rounded-md bg-slate-100">
-                    <iframe
-                      src={buildEmbedUrl(formMapLocation)}
-                      width="100%"
-                      height="100%"
-                      style={{ border: 0 }}
-                      allowFullScreen
-                      loading="lazy"
-                      referrerPolicy="no-referrer-when-downgrade"
-                      title="Map preview"
-                    />
+                    {isResolvingPreview && (
+                      <div className="absolute inset-0 flex items-center justify-center z-10 bg-slate-100">
+                        <span className="text-sm text-gray-500 animate-pulse">Resolving map location…</span>
+                      </div>
+                    )}
+                    {previewEmbed?.embedUrl && !isResolvingPreview && (
+                      <iframe
+                        src={previewEmbed.embedUrl}
+                        width="100%"
+                        height="100%"
+                        style={{ border: 0 }}
+                        allowFullScreen
+                        loading="lazy"
+                        referrerPolicy="no-referrer-when-downgrade"
+                        title="Map preview"
+                      />
+                    )}
+                    {!previewEmbed?.embedUrl && !isResolvingPreview && (
+                      <div className="absolute inset-0 flex items-center justify-center text-sm text-gray-400">
+                        Could not load map preview. Check the URL and try again.
+                      </div>
+                    )}
                   </div>
-                  <a
-                    href={buildDirectionUrl(formMapLocation)}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="inline-flex items-center gap-2 text-sm font-semibold text-accent hover:underline"
-                  >
-                    Open direction link
-                  </a>
+                  {previewEmbed?.directionUrl && (
+                    <a
+                      href={previewEmbed.directionUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center gap-2 text-sm font-semibold text-accent hover:underline"
+                    >
+                      Open direction link
+                    </a>
+                  )}
                 </div>
               )}
             </div>

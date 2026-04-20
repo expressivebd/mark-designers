@@ -1,7 +1,7 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 type HeroData = {
   videoUrl: string;
@@ -16,6 +16,7 @@ const Hero = ({ data }: { data?: HeroData | null }) => {
   const heroSubheadline = data?.subheadline || 'Home page content will be updated soon.';
   const heroVideo = data?.videoUrl || '/videos/hero-video.mp4';
   const [currentHeadline, setCurrentHeadline] = useState(0);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -25,31 +26,43 @@ const Hero = ({ data }: { data?: HeroData | null }) => {
     return () => clearInterval(interval);
   }, [heroHeadlines.length]);
 
+  // Defer video loading until after the page has fully loaded
+  // so it doesn't block LCP or TTI
+  useEffect(() => {
+    const startVideo = () => {
+      const video = videoRef.current;
+      if (!video) return;
+      video.src = heroVideo;
+      video.load();
+      video.play().catch(() => {
+        // Autoplay blocked — browser will still show poster
+      });
+    };
+
+    if (document.readyState === 'complete') {
+      // Page already loaded; start video after a short yield so paint completes
+      const t = setTimeout(startVideo, 200);
+      return () => clearTimeout(t);
+    }
+
+    window.addEventListener('load', startVideo, { once: true });
+    return () => window.removeEventListener('load', startVideo);
+  }, [heroVideo]);
+
   return (
     <section className="relative h-screen w-full overflow-hidden">
       {/* Video Background */}
       <div className="absolute inset-0">
         <video
+          ref={videoRef}
           autoPlay
           loop
           muted
           playsInline
+          preload="none"
+          poster="/p1.jpg"
           className="absolute inset-0 w-full h-full object-cover"
-        >
-          <source
-            src={heroVideo}
-            type="video/mp4"
-          />
-          {/* Fallback for browsers that don't support video */}
-        </video>
-        
-        {/* Fallback background image if video doesn't load */}
-        {/* <div 
-          className="absolute inset-0 bg-cover bg-center"
-          style={{
-            backgroundImage: 'url(https://images.unsplash.com/photo-1558618666-fcd25c85cd64?q=80&w=2940)',
-          }}
-        /> */}
+        />
         
         {/* Dark overlay */}
         <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/50 to-black/70" />

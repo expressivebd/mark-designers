@@ -349,10 +349,10 @@ export default function AboutPage() {
                                 animate={expertiseInView ? { opacity: 1, y: 0 } : {}}
                                 transition={{ duration: 0.5, delay: index * 0.05 }}
                                 className={`flex flex-col ${index % 2 === 0 ? 'md:flex-row' : 'md:flex-row-reverse'
-                                    } items-stretch border-b border-gray-100 last:border-0`}
+                                    } items-center gap-8 md:gap-12 lg:gap-16 py-12 md:py-16 border-b border-gray-100 last:border-0`}
                             >
                                 {/* Image */}
-                                <div className="relative w-full md:w-2/5 h-64 md:h-80 overflow-hidden">
+                                <div className="relative w-full md:w-2/5 h-64 md:h-80 overflow-hidden rounded-2xl shadow-xl">
                                     <Image
                                         src={item.imageUrl}
                                         alt={item.name}

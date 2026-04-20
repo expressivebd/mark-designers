@@ -124,26 +124,34 @@ const Products = ({ items }: { items?: ProductItem[] }) => {
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: 20, scale: 0.98 }}
                 transition={{ duration: 0.25 }}
-                className="w-full max-w-2xl overflow-hidden rounded-2xl bg-white shadow-2xl"
+                className="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl bg-white shadow-2xl"
                 onClick={(event) => event.stopPropagation()}
               >
-                <div className="relative h-72 w-full bg-slate-100 md:h-96">
-                  <Image
-                    src={selectedProduct.imageUrl || '/products/1.png'}
-                    alt={selectedProduct.name}
-                    fill
-                    className="object-cover"
-                    sizes="(max-width: 768px) 100vw, 768px"
-                  />
+                {/* Image — natural aspect ratio, no cropping */}
+                <div className="relative w-full bg-white">
+                  <div className="relative w-full" style={{ paddingBottom: '100%' }}>
+                    <Image
+                      src={selectedProduct.imageUrl || '/products/1.png'}
+                      alt={selectedProduct.name}
+                      fill
+                      className="object-contain"
+                      sizes="(max-width: 768px) 100vw, 768px"
+                    />
+                  </div>
+                  {/* Close button — sticky top-right */}
                   <button
                     type="button"
                     onClick={() => setSelectedProduct(null)}
-                    className="absolute right-4 top-4 rounded-full bg-white/90 px-3 py-1 text-sm font-medium text-primary shadow"
+                    className="absolute right-4 top-4 rounded-full bg-white/90 px-3 py-1 text-sm font-medium text-primary shadow z-10"
                   >
                     Close
                   </button>
                 </div>
 
+                {/* Horizontal divider */}
+                <hr className="border-t border-gray-200" />
+
+                {/* Content — this area scrolls with the modal */}
                 <div className="p-6 md:p-8">
                   <h3 className="text-2xl md:text-3xl font-playfair font-bold text-primary">
                     {selectedProduct.name}
