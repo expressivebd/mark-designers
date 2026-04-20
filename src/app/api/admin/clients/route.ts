@@ -24,7 +24,7 @@ export async function GET() {
   const db = await getDb();
   const [docs, statsDoc] = await Promise.all([
     db.collection('clients').find({}).sort({ order: 1, createdAt: 1 }).toArray(),
-    db.collection<ClientStatsDoc>('settings').findOne({ _id: 'clientStats' }),
+    db.collection<ClientStatsDoc>('settings').findOne({ _id: 'clientStats' } as any),
   ]);
 
   const items = docs.map(mapId);
@@ -70,8 +70,8 @@ export async function PUT(request: Request) {
   const db = await getDb();
 
   if (payload?.action === 'updateStats') {
-    await db.collection('settings').updateOne(
-      { _id: 'clientStats' },
+    await db.collection<{ _id: string }>('settings').updateOne(
+      { _id: 'clientStats' } as any,
       {
         $set: {
           countriesServed: String(payload?.countriesServed || '').trim(),
