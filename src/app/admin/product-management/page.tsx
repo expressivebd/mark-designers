@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
 import AdminPageHeader from '@/components/admin/AdminPageHeader';
 import UploadField from '@/components/admin/UploadField';
+import ConfirmDialog from '@/components/admin/ConfirmDialog';
 
 type AdminProduct = {
   id: string;
@@ -45,6 +46,11 @@ export default function ProductManagementAdmin() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSavingProduct, setIsSavingProduct] = useState(false);
   const [productForm, setProductForm] = useState<ProductForm>(emptyForm);
+  const [pendingDelete, setPendingDelete] = useState<
+    | { kind: 'product'; id: string }
+    | { kind: 'category'; id: string }
+    | null
+  >(null);
 
   const editingProduct = useMemo(() => Boolean(productForm.id), [productForm.id]);
 
@@ -177,10 +183,6 @@ export default function ProductManagementAdmin() {
   };
 
   const handleDeleteProduct = async (productId: string) => {
-    if (!window.confirm('Are you sure you want to delete this product?')) {
-      return;
-    }
-
     const response = await fetch('/api/admin/products', {
       method: 'DELETE',
       headers: { 'Content-Type': 'application/json' },
@@ -196,10 +198,6 @@ export default function ProductManagementAdmin() {
   };
 
   const handleDeleteCategory = async (categoryId: string) => {
-    if (!window.confirm('Delete this category and all products inside it?')) {
-      return;
-    }
-
     const response = await fetch('/api/admin/products', {
       method: 'DELETE',
       headers: { 'Content-Type': 'application/json' },
@@ -212,6 +210,32 @@ export default function ProductManagementAdmin() {
     }
 
     loadData();
+  };
+
+  const requestDeleteProduct = (productId: string) => {
+    setPendingDelete({ kind: 'product', id: productId });
+  };
+
+  const requestDeleteCategory = (categoryId: string) => {
+    setPendingDelete({ kind: 'category', id: categoryId });
+  };
+
+  const cancelDelete = () => {
+    setPendingDelete(null);
+  };
+
+  const confirmDelete = async () => {
+    if (!pendingDelete) {
+      return;
+    }
+
+    if (pendingDelete.kind === 'category') {
+      await handleDeleteCategory(pendingDelete.id);
+    } else {
+      await handleDeleteProduct(pendingDelete.id);
+    }
+
+    setPendingDelete(null);
   };
 
   return (
@@ -267,7 +291,7 @@ export default function ProductManagementAdmin() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => handleDeleteCategory(category.id)}
+                  onClick={() => requestDeleteCategory(category.id)}
                   disabled={category.id === 'uncategorized'}
                   className="rounded-sm border border-red-200 px-3 py-2 text-xs font-medium text-red-600 hover:border-red-400 disabled:cursor-not-allowed disabled:opacity-50"
                 >
@@ -311,7 +335,7 @@ export default function ProductManagementAdmin() {
                     </button>
                     <button
                       type="button"
-                      onClick={() => handleDeleteProduct(product.id)}
+                      onClick={() => requestDeleteProduct(product.id)}
                       className="flex-1 rounded-sm border border-red-200 px-2 py-1.5 text-[11px] font-medium text-red-600 hover:border-red-400"
                     >
                       Delete
@@ -431,6 +455,20 @@ export default function ProductManagementAdmin() {
           </div>
         </div>
       )}
+
+      <ConfirmDialog
+        isOpen={Boolean(pendingDelete)}
+        title={pendingDelete?.kind === 'category' ? 'Delete Category' : 'Delete Product'}
+        message={
+          pendingDelete?.kind === 'category'
+            ? 'Are you sure you want to delete this category and all products inside it?'
+            : 'Are you sure you want to delete this product?'
+        }
+        confirmLabel="Confirm"
+        cancelLabel="Cancel"
+        onConfirm={confirmDelete}
+        onCancel={cancelDelete}
+      />
     </div>
   );
 }

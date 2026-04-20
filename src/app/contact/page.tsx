@@ -1,51 +1,46 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
 import Image from 'next/image';
 import SEOHead from '@/components/SEOHead';
 
-const offices = [
-    {
-        name: 'Head Office',
-        type: 'Corporate Headquarters',
-        address: 'House 42, Road 8, Block F, Banani, Dhaka 1213, Bangladesh',
-        phone: '+880 2 9820445',
-        phone2: '+880 2 9820446',
-        email: 'info@markdesigners.com',
-        mapEmbed: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3650.4783!2d90.4025!3d23.7945!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMjPCsDQ3JzQwLjIiTiA5MMKwMjQnMDkuMCJF!5e0!3m2!1sen!2sbd!4v1',
-    },
-    {
-        name: 'Mark Designers Limited',
-        type: 'Manufacturing Facility',
-        address: 'Tongi Industrial Area, Gazipur Sadar, Gazipur 1704, Bangladesh',
-        phone: '+880 2 9802345',
-        phone2: '+880 2 9802346',
-        email: 'factory1@markdesigners.com',
-        mapEmbed: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3648.5!2d90.4!3d23.88!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMjPCsDUyJzQ4LjAiTiA5MMKwMjQnMDAuMCJF!5e0!3m2!1sen!2sbd!4v1',
-    },
-    {
-        name: 'Mark Wear Limited',
-        type: 'Manufacturing Facility',
-        address: 'Fatullah Industrial Zone, Narayanganj 1420, Bangladesh',
-        phone: '+880 2 7642345',
-        phone2: '+880 2 7642346',
-        email: 'factory2@markdesigners.com',
-        mapEmbed: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3653.5!2d90.5!3d23.68!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMjPCsDQwJzQ4LjAiTiA5MMKwMzAnMDAuMCJF!5e0!3m2!1sen!2sbd!4v1',
-    },
-    {
-        name: 'Mark 2000 Limited',
-        type: 'Manufacturing Facility',
-        address: 'Hemayetpur, Savar, Dhaka 1340, Bangladesh',
-        phone: '+880 2 7745123',
-        phone2: '+880 2 7745124',
-        email: 'factory3@markdesigners.com',
-        mapEmbed: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3651.0!2d90.26!3d23.78!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMjPCsDQ2JzQ4LjAiTiA5MMKwMTUnMzYuMCJF!5e0!3m2!1sen!2sbd!4v1',
-    },
-];
+type ContactAddress = {
+    id: string;
+    title: string;
+    fullAddress: string;
+    phones: string[];
+    emails: string[];
+    mapLocation: string;
+    mapEmbedUrl: string;
+    directionUrl: string;
+};
 
 export default function ContactPage() {
     const [heroRef, heroInView] = useInView({ triggerOnce: true, threshold: 0.1 });
+    const [addresses, setAddresses] = useState<ContactAddress[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        const loadAddresses = async () => {
+            try {
+                const response = await fetch('/api/contact');
+                if (!response.ok) {
+                    throw new Error('Failed to load contact addresses');
+                }
+
+                const data = (await response.json()) as ContactAddress[];
+                setAddresses(data || []);
+            } catch {
+                setAddresses([]);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        loadAddresses();
+    }, []);
 
     return (
         <>
@@ -72,10 +67,15 @@ export default function ContactPage() {
             {/* Offices */}
             <section className="section-padding bg-white">
                 <div className="container-custom">
-                    <div className="space-y-16 md:space-y-24">
-                        {offices.map((office, index) => (
+                    {isLoading ? (
+                        <p className="text-center text-gray-600">Loading contact addresses...</p>
+                    ) : addresses.length === 0 ? (
+                        <p className="text-center text-gray-600">Contact addresses will appear here once added from the admin panel.</p>
+                    ) : (
+                        <div className="space-y-16 md:space-y-24">
+                            {addresses.map((office, index) => (
                             <motion.div
-                                key={index}
+                                key={office.id}
                                 initial={{ opacity: 0, y: 40 }}
                                 whileInView={{ opacity: 1, y: 0 }}
                                 viewport={{ once: true }}
@@ -86,14 +86,14 @@ export default function ContactPage() {
                                 {/* Map */}
                                 <div className="w-full lg:w-1/2 h-[300px] md:h-[400px] rounded-2xl overflow-hidden shadow-lg border border-gray-100">
                                     <iframe
-                                        src={office.mapEmbed}
+                                        src={office.mapEmbedUrl}
                                         width="100%"
                                         height="100%"
                                         style={{ border: 0 }}
                                         allowFullScreen
                                         loading="lazy"
                                         referrerPolicy="no-referrer-when-downgrade"
-                                        title={`Map - ${office.name}`}
+                                        title={`Map - ${office.title}`}
                                     />
                                 </div>
 
@@ -101,9 +101,8 @@ export default function ContactPage() {
                                 <div className="w-full lg:w-1/2 flex items-center">
                                     <div className="space-y-6 w-full">
                                         <div>
-                                            <p className="text-accent text-sm font-semibold tracking-widest mb-1">{office.type}</p>
                                             <h2 className="text-2xl md:text-3xl lg:text-4xl font-playfair font-bold text-primary">
-                                                {office.name}
+                                                {office.title}
                                             </h2>
                                         </div>
 
@@ -117,7 +116,7 @@ export default function ContactPage() {
                                             </div>
                                             <div>
                                                 <p className="text-sm font-semibold text-primary mb-1">Address</p>
-                                                <p className="text-gray-600">{office.address}</p>
+                                                <p className="text-gray-600">{office.fullAddress}</p>
                                             </div>
                                         </div>
 
@@ -130,8 +129,15 @@ export default function ContactPage() {
                                             </div>
                                             <div>
                                                 <p className="text-sm font-semibold text-primary mb-1">Phone</p>
-                                                <a href={`tel:${office.phone}`} className="text-gray-600 hover:text-accent transition-colors block">{office.phone}</a>
-                                                <a href={`tel:${office.phone2}`} className="text-gray-600 hover:text-accent transition-colors block">{office.phone2}</a>
+                                                {office.phones.map((phone, phoneIndex) => (
+                                                    <a
+                                                        key={`${office.id}-phone-${phoneIndex}`}
+                                                        href={`tel:${phone}`}
+                                                        className="text-gray-600 hover:text-accent transition-colors block"
+                                                    >
+                                                        {phone}
+                                                    </a>
+                                                ))}
                                             </div>
                                         </div>
 
@@ -144,14 +150,35 @@ export default function ContactPage() {
                                             </div>
                                             <div>
                                                 <p className="text-sm font-semibold text-primary mb-1">Email</p>
-                                                <a href={`mailto:${office.email}`} className="text-gray-600 hover:text-accent transition-colors">{office.email}</a>
+                                                {office.emails.map((email, emailIndex) => (
+                                                    <a
+                                                        key={`${office.id}-email-${emailIndex}`}
+                                                        href={`mailto:${email}`}
+                                                        className="text-gray-600 hover:text-accent transition-colors block"
+                                                    >
+                                                        {email}
+                                                    </a>
+                                                ))}
                                             </div>
                                         </div>
+
+                                        <a
+                                            href={office.directionUrl}
+                                            target="_blank"
+                                            rel="noreferrer"
+                                            className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-3 text-sm font-semibold text-white transition-all duration-300 hover:bg-primary-dark hover:scale-105"
+                                        >
+                                            Get Direction
+                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                                            </svg>
+                                        </a>
                                     </div>
                                 </div>
                             </motion.div>
-                        ))}
-                    </div>
+                            ))}
+                        </div>
+                    )}
                 </div>
             </section>
 

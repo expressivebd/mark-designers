@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import UploadField from './UploadField';
+import ConfirmDialog from './ConfirmDialog';
 
 type FieldType = 'text' | 'textarea' | 'image' | 'date';
 
@@ -26,6 +27,7 @@ const CollectionManager = ({ title, endpoint, fields, folder }: CollectionManage
   const [form, setForm] = useState<Record<string, string>>({});
   const [editId, setEditId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<Record<string, string>>({});
+  const [deleteId, setDeleteId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -98,6 +100,23 @@ const CollectionManager = ({ title, endpoint, fields, folder }: CollectionManage
     }
 
     fetchItems();
+  };
+
+  const requestDelete = (id: string) => {
+    setDeleteId(id);
+  };
+
+  const cancelDelete = () => {
+    setDeleteId(null);
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteId) {
+      return;
+    }
+
+    await handleDelete(deleteId);
+    setDeleteId(null);
   };
 
   return (
@@ -241,7 +260,7 @@ const CollectionManager = ({ title, endpoint, fields, folder }: CollectionManage
                     </button>
                     <button
                       type="button"
-                      onClick={() => handleDelete(item.id)}
+                      onClick={() => requestDelete(item.id)}
                       className="rounded-sm border border-red-200 px-4 py-2 text-sm font-medium text-red-600 hover:border-red-400"
                     >
                       Delete
@@ -254,6 +273,16 @@ const CollectionManager = ({ title, endpoint, fields, folder }: CollectionManage
         </div>
         {error && <p className="mt-4 text-sm text-red-600">{error}</p>}
       </div>
+
+      <ConfirmDialog
+        isOpen={Boolean(deleteId)}
+        title={`Delete ${title}`}
+        message={`Are you sure you want to delete this ${title.toLowerCase()} item?`}
+        confirmLabel="Confirm"
+        cancelLabel="Cancel"
+        onConfirm={confirmDelete}
+        onCancel={cancelDelete}
+      />
     </div>
   );
 };

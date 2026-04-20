@@ -3,16 +3,6 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect } from 'react';
 
-const defaultHeadlines = [
-  'Crafting Quality Since 1995',
-  'Excellence in Garment Manufacturing',
-  'Your Trusted Global Partner',
-  'Innovation Meets Tradition',
-];
-
-const defaultSubheadline =
-  'Serving clients across Europe, North America, and Asia with premium garment manufacturing';
-
 type HeroData = {
   videoUrl: string;
   headlines: string[];
@@ -20,8 +10,10 @@ type HeroData = {
 };
 
 const Hero = ({ data }: { data?: HeroData | null }) => {
-  const heroHeadlines = data?.headlines?.length ? data.headlines : defaultHeadlines;
-  const heroSubheadline = data?.subheadline || defaultSubheadline;
+  const heroHeadlines = data?.headlines?.length
+    ? data.headlines
+    : ['Welcome to Mark Designers'];
+  const heroSubheadline = data?.subheadline || 'Home page content will be updated soon.';
   const heroVideo = data?.videoUrl || '/videos/hero-video.mp4';
   const [currentHeadline, setCurrentHeadline] = useState(0);
 

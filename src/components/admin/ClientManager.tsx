@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
 import UploadField from './UploadField';
+import ConfirmDialog from './ConfirmDialog';
 
 type ClientItem = {
   id: string;
@@ -45,6 +46,7 @@ export default function ClientManager() {
   const [editId, setEditId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<FormState>(emptyForm);
   const [stats, setStats] = useState<ClientStats>(emptyStats);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -123,10 +125,6 @@ export default function ClientManager() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!window.confirm('Are you sure you want to delete this client?')) {
-      return;
-    }
-
     const response = await fetch('/api/admin/clients', {
       method: 'DELETE',
       headers: { 'Content-Type': 'application/json' },
@@ -139,6 +137,23 @@ export default function ClientManager() {
     }
 
     loadItems();
+  };
+
+  const requestDelete = (id: string) => {
+    setDeleteId(id);
+  };
+
+  const cancelDelete = () => {
+    setDeleteId(null);
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteId) {
+      return;
+    }
+
+    await handleDelete(deleteId);
+    setDeleteId(null);
   };
 
   const handleSaveStats = async () => {
@@ -306,7 +321,7 @@ export default function ClientManager() {
                     </button>
                     <button
                       type="button"
-                      onClick={() => handleDelete(item.id)}
+                      onClick={() => requestDelete(item.id)}
                       className="flex-1 rounded-sm border border-red-200 px-3 py-2 text-xs font-medium text-red-600"
                     >
                       Delete
@@ -320,6 +335,16 @@ export default function ClientManager() {
 
         {error && <p className="mt-4 text-sm text-red-600">{error}</p>}
       </div>
+
+      <ConfirmDialog
+        isOpen={Boolean(deleteId)}
+        title="Delete Client"
+        message="Are you sure you want to delete this client?"
+        confirmLabel="Confirm"
+        cancelLabel="Cancel"
+        onConfirm={confirmDelete}
+        onCancel={cancelDelete}
+      />
     </div>
   );
 }

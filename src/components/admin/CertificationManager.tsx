@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import Image from 'next/image';
 import UploadField from './UploadField';
+import ConfirmDialog from './ConfirmDialog';
 
 type CertificationItem = {
   id: string;
@@ -25,6 +26,7 @@ export default function CertificationManager() {
   const [form, setForm] = useState<FormState>(emptyForm);
   const [editId, setEditId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<FormState>(emptyForm);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -94,10 +96,6 @@ export default function CertificationManager() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!window.confirm('Are you sure you want to delete this certification?')) {
-      return;
-    }
-
     const response = await fetch('/api/admin/certifications', {
       method: 'DELETE',
       headers: { 'Content-Type': 'application/json' },
@@ -110,6 +108,23 @@ export default function CertificationManager() {
     }
 
     loadItems();
+  };
+
+  const requestDelete = (id: string) => {
+    setDeleteId(id);
+  };
+
+  const cancelDelete = () => {
+    setDeleteId(null);
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteId) {
+      return;
+    }
+
+    await handleDelete(deleteId);
+    setDeleteId(null);
   };
 
   return (
@@ -208,7 +223,7 @@ export default function CertificationManager() {
                     </button>
                     <button
                       type="button"
-                      onClick={() => handleDelete(item.id)}
+                      onClick={() => requestDelete(item.id)}
                       className="flex-1 rounded-sm border border-red-200 px-3 py-2 text-xs font-medium text-red-600"
                     >
                       Delete
@@ -222,6 +237,16 @@ export default function CertificationManager() {
 
         {error && <p className="mt-4 text-sm text-red-600">{error}</p>}
       </div>
+
+      <ConfirmDialog
+        isOpen={Boolean(deleteId)}
+        title="Delete Certification"
+        message="Are you sure you want to delete this certification?"
+        confirmLabel="Confirm"
+        cancelLabel="Cancel"
+        onConfirm={confirmDelete}
+        onCancel={cancelDelete}
+      />
     </div>
   );
 }

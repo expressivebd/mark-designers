@@ -2,9 +2,11 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import UploadField from './UploadField';
+import ConfirmDialog from './ConfirmDialog';
 
 type SisterConcernForm = {
   name: string;
+  tagline: string;
   thumbnailUrl: string;
   description: string;
   establishedYear: string;
@@ -36,6 +38,7 @@ function slugify(value: string) {
 function emptyForm(): SisterConcernForm {
   return {
     name: '',
+    tagline: '',
     thumbnailUrl: '',
     description: '',
     establishedYear: '',
@@ -60,6 +63,7 @@ export default function SisterConcernManager() {
   const [form, setForm] = useState<SisterConcernForm>(emptyForm());
   const [editId, setEditId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<SisterConcernForm>(emptyForm());
+  const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -158,6 +162,23 @@ export default function SisterConcernManager() {
     fetchItems();
   };
 
+  const requestDelete = (id: string, name: string) => {
+    setDeleteTarget({ id, name });
+  };
+
+  const cancelDelete = () => {
+    setDeleteTarget(null);
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteTarget) {
+      return;
+    }
+
+    await handleDelete(deleteTarget.id);
+    setDeleteTarget(null);
+  };
+
   const renderFactoryPhotoEditor = (
     photos: string[],
     onChange: (next: string[]) => void,
@@ -216,6 +237,16 @@ export default function SisterConcernManager() {
             type="text"
             value={values.name}
             onChange={(event) => setValues((prev) => ({ ...prev, name: event.target.value }))}
+            className="w-full rounded-sm border border-slate-200 px-3 py-2 text-sm"
+          />
+        </div>
+
+        <div className="space-y-2">
+          <label className="block text-sm font-medium text-primary">Tagline</label>
+          <input
+            type="text"
+            value={values.tagline}
+            onChange={(event) => setValues((prev) => ({ ...prev, tagline: event.target.value }))}
             className="w-full rounded-sm border border-slate-200 px-3 py-2 text-sm"
           />
         </div>
@@ -398,6 +429,9 @@ export default function SisterConcernManager() {
                       <span className="font-medium text-primary">Name:</span> {item.name || '-'}
                     </div>
                     <div>
+                      <span className="font-medium text-primary">Tagline:</span> {item.tagline || '-'}
+                    </div>
+                    <div>
                       <span className="font-medium text-primary">Link:</span> {item.link || '-'}
                     </div>
                     <div>
@@ -435,6 +469,7 @@ export default function SisterConcernManager() {
                         setEditId(item.id);
                         setEditForm({
                           name: item.name || '',
+                          tagline: item.tagline || '',
                           thumbnailUrl: item.thumbnailUrl || '',
                           description: item.description || '',
                           establishedYear: item.establishedYear || '',
@@ -451,7 +486,7 @@ export default function SisterConcernManager() {
                     </button>
                     <button
                       type="button"
-                      onClick={() => handleDelete(item.id)}
+                      onClick={() => requestDelete(item.id, item.name)}
                       className="rounded-sm border border-red-200 px-4 py-2 text-sm font-medium text-red-600 hover:border-red-400"
                     >
                       Delete
@@ -465,6 +500,16 @@ export default function SisterConcernManager() {
 
         {error && <p className="mt-4 text-sm text-red-600">{error}</p>}
       </div>
+
+      <ConfirmDialog
+        isOpen={Boolean(deleteTarget)}
+        title="Delete Sister Concern"
+        message={`Are you sure you want to delete ${deleteTarget?.name || 'this sister concern'}?`}
+        confirmLabel="Confirm"
+        cancelLabel="Cancel"
+        onConfirm={confirmDelete}
+        onCancel={cancelDelete}
+      />
     </div>
   );
 }

@@ -49,7 +49,9 @@ export default async function SisterConcernsPage() {
                                     <h2 className="text-3xl md:text-4xl lg:text-5xl font-playfair font-bold text-primary">
                                         {concern.name}
                                     </h2>
-                                    <p className="text-gray-600 leading-relaxed text-lg line-clamp-3">{concern.description}</p>
+                                    <p className="text-gray-600 leading-relaxed text-lg line-clamp-3">
+                                        {concern.tagline || 'Tagline will be updated soon.'}
+                                    </p>
 
                                     <div className="grid grid-cols-2 gap-4">
                                         <div className="bg-slate-50 rounded-xl p-4">

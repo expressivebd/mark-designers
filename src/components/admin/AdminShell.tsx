@@ -13,6 +13,7 @@ const navItems = [
   { label: 'Certifications', href: '/admin/certification-management' },
   { label: 'Clients', href: '/admin/client-management' },
   { label: 'News', href: '/admin/news-management' },
+  { label: 'Contacts', href: '/admin/contact' },
 ];
 
 const AdminShell = ({ children }: { children: React.ReactNode }) => {

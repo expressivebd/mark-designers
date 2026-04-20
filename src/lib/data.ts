@@ -48,6 +48,7 @@ export type AboutPageData = {
 export type SisterConcernItem = {
   id: string;
   name: string;
+  tagline: string;
   slug: string;
   thumbnailUrl: string;
   description: string;
@@ -74,6 +75,7 @@ function normalizeSisterConcern(item: Record<string, unknown>): SisterConcernIte
   return {
     id,
     name,
+    tagline: String(item.tagline || item.shortDescription || item.description || ''),
     slug,
     thumbnailUrl,
     description: String(item.description || ''),
@@ -134,6 +136,41 @@ export type NewsItem = {
   imageUrl: string;
   link: string;
 };
+
+export type ContactAddressItem = {
+  id: string;
+  title: string;
+  fullAddress: string;
+  phones: string[];
+  emails: string[];
+  mapLocation: string;
+  mapEmbedUrl: string;
+  directionUrl: string;
+};
+
+function normalizeContactAddress(item: Record<string, unknown>): ContactAddressItem {
+  const mapLocation = String(item.mapLocation || item.fullAddress || '').trim();
+  const encodedLocation = encodeURIComponent(mapLocation || String(item.fullAddress || '').trim());
+
+  return {
+    id: String(item.id || ''),
+    title: String(item.title || ''),
+    fullAddress: String(item.fullAddress || ''),
+    phones: Array.isArray(item.phones)
+      ? item.phones.filter((phone): phone is string => typeof phone === 'string' && phone.trim().length > 0)
+      : [],
+    emails: Array.isArray(item.emails)
+      ? item.emails.filter((email): email is string => typeof email === 'string' && email.trim().length > 0)
+      : [],
+    mapLocation,
+    mapEmbedUrl: mapLocation
+      ? `https://www.google.com/maps?q=${encodedLocation}&output=embed`
+      : '',
+    directionUrl: mapLocation
+      ? `https://www.google.com/maps/dir/?api=1&destination=${encodedLocation}`
+      : '',
+  };
+}
 
 export async function getHomepage() {
   const db = await getDb();
@@ -316,4 +353,15 @@ export async function getNews() {
     .sort({ date: -1, createdAt: -1 })
     .toArray();
   return docs.map(mapId);
+}
+
+export async function getContactAddresses() {
+  const db = await getDb();
+  const docs = await db
+    .collection<Record<string, unknown> & { _id: ObjectId }>('contactAddresses')
+    .find({})
+    .sort({ order: 1, createdAt: 1 })
+    .toArray();
+
+  return docs.map((doc) => normalizeContactAddress(mapId(doc) as Record<string, unknown>));
 }

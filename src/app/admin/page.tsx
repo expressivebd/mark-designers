@@ -20,6 +20,11 @@ export default function AdminDashboard() {
           href="/admin/about"
         />
         <AdminSectionCard
+          title="Contact Page"
+          description="Manage contact addresses, phone numbers, emails, and map locations."
+          href="/admin/contact"
+        />
+        <AdminSectionCard
           title="Sister Concerns"
           description="Update sister concern cards and descriptions."
           href="/admin/sister-concerns"

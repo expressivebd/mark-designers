@@ -23,7 +23,7 @@ export default async function SisterConcernDetailPage({ params }: { params: Prom
     <SisterConcernDetail
       data={{
         name: concern.name,
-        tagline: `${concern.capacity || 'Production capacity'} | ${concern.personnel || 'Skilled personnel'}`,
+        tagline: concern.tagline || 'Tagline will be updated soon.',
         location: concern.location,
         fullAddress: concern.location,
         established: concern.establishedYear,

@@ -5,21 +5,11 @@ import { useInView } from 'react-intersection-observer';
 import CountUp from 'react-countup';
 import Link from 'next/link';
 
-const defaultStats = [
-  { number: 30, suffix: '+', label: 'Years of Experience' },
-  { number: 20, suffix: '+', label: 'Certifications' },
-  { number: 1000, suffix: '+', label: 'Clients Served' },
-  { number: 45000, suffix: '+', label: 'Daily Outputs' },
-];
-
-const defaultText =
-  'Since 1995, Mark Designers Ltd. has been serving clients across Europe, North America, and Asia with quality and commitment. The company portfolio also expanded by setting up two other production facilities- Mark Wear Limited and Mark 2000 Limited. All of these three state-of-the-art production facilities are fully compliant under the supervision of Accord and RSC.';
-
 type StatItem = { number: number; suffix: string; label: string };
 
 const AboutUs = ({ text, stats }: { text?: string; stats?: StatItem[] }) => {
-  const aboutText = text || defaultText;
-  const aboutStats = stats?.length ? stats : defaultStats;
+  const aboutText = text || 'About section content will be available soon.';
+  const aboutStats = stats?.length ? stats : [];
   const [ref, inView] = useInView({
     triggerOnce: true,
     threshold: 0.2,
@@ -58,36 +48,45 @@ const AboutUs = ({ text, stats }: { text?: string; stats?: StatItem[] }) => {
         </motion.div>
 
         {/* Stats */}
-        <div
-          ref={statsRef}
-          className="grid grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8"
-        >
-          {aboutStats.map((stat, index) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, y: 30 }}
-              animate={statsInView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.6, delay: index * 0.1 }}
-              className="text-center group"
-            >
-              <div className="aspect-square rounded-2xl border-2 border-gray-200 p-6 shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 flex flex-col items-center justify-center bg-white hover:border-primary">
-                <div className="text-3xl sm:text-4xl md:text-5xl font-playfair font-bold text-primary mb-3">
-                  {statsInView && (
-                    <CountUp
-                      end={stat.number}
-                      duration={2.5}
-                      separator=","
-                      suffix={stat.suffix}
-                    />
-                  )}
+        {aboutStats.length > 0 ? (
+          <div
+            ref={statsRef}
+            className="grid grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8"
+          >
+            {aboutStats.map((stat, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 30 }}
+                animate={statsInView ? { opacity: 1, y: 0 } : {}}
+                transition={{ duration: 0.6, delay: index * 0.1 }}
+                className="text-center group"
+              >
+                <div className="aspect-square rounded-2xl border-2 border-gray-200 p-6 shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 flex flex-col items-center justify-center bg-white hover:border-primary">
+                  <div className="text-3xl sm:text-4xl md:text-5xl font-playfair font-bold text-primary mb-3">
+                    {statsInView && (
+                      <CountUp
+                        end={stat.number}
+                        duration={2.5}
+                        separator="," 
+                        suffix={stat.suffix}
+                      />
+                    )}
+                  </div>
+                  <p className="text-primary font-medium text-xs sm:text-sm md:text-base tracking-wide leading-tight">
+                    {stat.label}
+                  </p>
                 </div>
-                <p className="text-primary font-medium text-xs sm:text-sm md:text-base tracking-wide leading-tight">
-                  {stat.label}
-                </p>
-              </div>
-            </motion.div>
-          ))}
-        </div>
+              </motion.div>
+            ))}
+          </div>
+        ) : (
+          <p
+            ref={statsRef}
+            className="text-center text-gray-600"
+          >
+            Key achievements will appear here once available.
+          </p>
+        )}
 
         {/* CTA */}
         <motion.div

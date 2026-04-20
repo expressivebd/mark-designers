@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Image from 'next/image';
 import UploadField from './UploadField';
 import StatsEditor from './StatsEditor';
 
@@ -47,6 +48,10 @@ export default function AboutPageController() {
   const [data, setData] = useState<AboutPageData>(defaultData);
   const [facilityDraft, setFacilityDraft] = useState<FacilityItem>(emptyFacility);
   const [expertiseDraft, setExpertiseDraft] = useState<ExpertiseItem>(emptyExpertise);
+  const [facilityEditIndex, setFacilityEditIndex] = useState<number | null>(null);
+  const [facilityEditDraft, setFacilityEditDraft] = useState<FacilityItem>(emptyFacility);
+  const [expertiseEditIndex, setExpertiseEditIndex] = useState<number | null>(null);
+  const [expertiseEditDraft, setExpertiseEditDraft] = useState<ExpertiseItem>(emptyExpertise);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [status, setStatus] = useState('');
@@ -128,6 +133,56 @@ export default function AboutPageController() {
     }));
     setExpertiseDraft(emptyExpertise);
     setStatus('Expertise item added to draft list. Save About Page to publish.');
+  };
+
+  const saveFacilityEdit = () => {
+    if (facilityEditIndex === null) {
+      return;
+    }
+
+    if (!facilityEditDraft.name.trim() || !facilityEditDraft.imageUrl.trim()) {
+      setStatus('Facility name and photo are required.');
+      return;
+    }
+
+    setData((prev) => ({
+      ...prev,
+      facilities: prev.facilities.map((item, index) =>
+        index === facilityEditIndex
+          ? { ...facilityEditDraft, name: facilityEditDraft.name.trim() }
+          : item
+      ),
+    }));
+    setFacilityEditIndex(null);
+    setFacilityEditDraft(emptyFacility);
+    setStatus('Facility updated in draft list. Save About Page to publish.');
+  };
+
+  const saveExpertiseEdit = () => {
+    if (expertiseEditIndex === null) {
+      return;
+    }
+
+    if (!expertiseEditDraft.name.trim() || !expertiseEditDraft.details.trim() || !expertiseEditDraft.imageUrl.trim()) {
+      setStatus('Expertise name, details, and photo are required.');
+      return;
+    }
+
+    setData((prev) => ({
+      ...prev,
+      expertise: prev.expertise.map((item, index) =>
+        index === expertiseEditIndex
+          ? {
+              ...expertiseEditDraft,
+              name: expertiseEditDraft.name.trim(),
+              details: expertiseEditDraft.details.trim(),
+            }
+          : item
+      ),
+    }));
+    setExpertiseEditIndex(null);
+    setExpertiseEditDraft(emptyExpertise);
+    setStatus('Expertise item updated in draft list. Save About Page to publish.');
   };
 
   const handleSave = async () => {
@@ -215,20 +270,88 @@ export default function AboutPageController() {
           <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
             {data.facilities.map((item, index) => (
               <div key={`${item.name}-${index}`} className="rounded-md border border-slate-200 p-3 space-y-2">
-                <p className="text-sm font-medium text-primary">{item.name}</p>
-                <p className="text-xs text-gray-500 break-all">{item.imageUrl}</p>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setData((prev) => ({
-                      ...prev,
-                      facilities: prev.facilities.filter((_, itemIndex) => itemIndex !== index),
-                    }));
-                  }}
-                  className="rounded-sm border border-red-200 px-3 py-1 text-xs font-medium text-red-600"
-                >
-                  Remove
-                </button>
+                {facilityEditIndex === index ? (
+                  <>
+                    <div className="space-y-2">
+                      <label className="block text-xs font-medium text-primary">Facility Name</label>
+                      <input
+                        type="text"
+                        value={facilityEditDraft.name}
+                        onChange={(event) =>
+                          setFacilityEditDraft((prev) => ({ ...prev, name: event.target.value }))
+                        }
+                        className="w-full rounded-sm border border-slate-200 px-3 py-2 text-sm"
+                      />
+                    </div>
+
+                    <UploadField
+                      label="Facility Photo"
+                      value={facilityEditDraft.imageUrl}
+                      folder="facilities"
+                      accept=".jpg,.jpeg,.png,image/jpeg,image/png"
+                      onChange={(url) => setFacilityEditDraft((prev) => ({ ...prev, imageUrl: url }))}
+                    />
+
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        onClick={saveFacilityEdit}
+                        className="rounded-sm bg-primary px-3 py-1 text-xs font-medium text-white"
+                      >
+                        Save
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setFacilityEditIndex(null);
+                          setFacilityEditDraft(emptyFacility);
+                        }}
+                        className="rounded-sm border border-slate-200 px-3 py-1 text-xs font-medium text-primary"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <p className="text-sm font-medium text-primary">{item.name}</p>
+                    {item.imageUrl && (
+                      <div className="relative h-24 w-32 overflow-hidden rounded-sm border border-slate-200 bg-slate-100">
+                        <Image
+                          src={item.imageUrl}
+                          alt={item.name}
+                          fill
+                          className="object-cover"
+                          sizes="128px"
+                        />
+                      </div>
+                    )}
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setFacilityEditIndex(index);
+                          setFacilityEditDraft(item);
+                        }}
+                        className="rounded-sm border border-slate-200 px-3 py-1 text-xs font-medium text-primary"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setData((prev) => ({
+                            ...prev,
+                            facilities: prev.facilities.filter((_, itemIndex) => itemIndex !== index),
+                          }));
+                        }}
+                        className="rounded-sm border border-red-200 px-3 py-1 text-xs font-medium text-red-600"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  </>
+                )}
               </div>
             ))}
           </div>
@@ -285,21 +408,101 @@ export default function AboutPageController() {
           <div className="grid gap-3 md:grid-cols-2">
             {data.expertise.map((item, index) => (
               <div key={`${item.name}-${index}`} className="rounded-md border border-slate-200 p-3 space-y-2">
-                <p className="text-sm font-medium text-primary">{item.name}</p>
-                <p className="text-xs text-gray-500">{item.details}</p>
-                <p className="text-xs text-gray-500 break-all">{item.imageUrl}</p>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setData((prev) => ({
-                      ...prev,
-                      expertise: prev.expertise.filter((_, itemIndex) => itemIndex !== index),
-                    }));
-                  }}
-                  className="rounded-sm border border-red-200 px-3 py-1 text-xs font-medium text-red-600"
-                >
-                  Remove
-                </button>
+                {expertiseEditIndex === index ? (
+                  <>
+                    <div className="space-y-2">
+                      <label className="block text-xs font-medium text-primary">Expertise Name</label>
+                      <input
+                        type="text"
+                        value={expertiseEditDraft.name}
+                        onChange={(event) =>
+                          setExpertiseEditDraft((prev) => ({ ...prev, name: event.target.value }))
+                        }
+                        className="w-full rounded-sm border border-slate-200 px-3 py-2 text-sm"
+                      />
+                    </div>
+
+                    <UploadField
+                      label="Expertise Photo"
+                      value={expertiseEditDraft.imageUrl}
+                      folder="expertise"
+                      accept=".jpg,.jpeg,.png,image/jpeg,image/png"
+                      onChange={(url) => setExpertiseEditDraft((prev) => ({ ...prev, imageUrl: url }))}
+                    />
+
+                    <div className="space-y-2">
+                      <label className="block text-xs font-medium text-primary">Details</label>
+                      <textarea
+                        value={expertiseEditDraft.details}
+                        onChange={(event) =>
+                          setExpertiseEditDraft((prev) => ({ ...prev, details: event.target.value }))
+                        }
+                        className="w-full rounded-sm border border-slate-200 px-3 py-2 text-sm"
+                        rows={3}
+                      />
+                    </div>
+
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        onClick={saveExpertiseEdit}
+                        className="rounded-sm bg-primary px-3 py-1 text-xs font-medium text-white"
+                      >
+                        Save
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setExpertiseEditIndex(null);
+                          setExpertiseEditDraft(emptyExpertise);
+                        }}
+                        className="rounded-sm border border-slate-200 px-3 py-1 text-xs font-medium text-primary"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <p className="text-sm font-medium text-primary">{item.name}</p>
+                    <p className="text-xs text-gray-500">{item.details}</p>
+                    {item.imageUrl && (
+                      <div className="relative h-24 w-32 overflow-hidden rounded-sm border border-slate-200 bg-slate-100">
+                        <Image
+                          src={item.imageUrl}
+                          alt={item.name}
+                          fill
+                          className="object-cover"
+                          sizes="128px"
+                        />
+                      </div>
+                    )}
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setExpertiseEditIndex(index);
+                          setExpertiseEditDraft(item);
+                        }}
+                        className="rounded-sm border border-slate-200 px-3 py-1 text-xs font-medium text-primary"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setData((prev) => ({
+                            ...prev,
+                            expertise: prev.expertise.filter((_, itemIndex) => itemIndex !== index),
+                          }));
+                        }}
+                        className="rounded-sm border border-red-200 px-3 py-1 text-xs font-medium text-red-600"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  </>
+                )}
               </div>
             ))}
           </div>

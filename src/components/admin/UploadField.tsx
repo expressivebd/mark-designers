@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 
 type UploadFieldProps = {
   label: string;
@@ -13,6 +14,13 @@ type UploadFieldProps = {
 const UploadField = ({ label, value, onChange, folder, accept }: UploadFieldProps) => {
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState('');
+
+  const normalizedAccept = accept || '.jpg,.jpeg,.png,image/jpeg,image/png';
+  const imageAccept = normalizedAccept.includes('image');
+  const hasImageValue =
+    imageAccept &&
+    Boolean(value) &&
+    (/\.(jpg|jpeg|png|webp|gif|avif|bmp|svg)(\?|$)/i.test(value) || value.includes('/image/'));
 
   const handleUpload = async (file: File) => {
     setIsUploading(true);
@@ -49,7 +57,7 @@ const UploadField = ({ label, value, onChange, folder, accept }: UploadFieldProp
       <div className="flex items-center gap-4">
         <input
           type="file"
-          accept={accept || '.jpg,.jpeg,.png,image/jpeg,image/png'}
+          accept={normalizedAccept}
           onChange={(event) => {
             const file = event.target.files?.[0];
             if (file) {
@@ -60,7 +68,20 @@ const UploadField = ({ label, value, onChange, folder, accept }: UploadFieldProp
         />
         {isUploading && <span className="text-sm text-accent">Uploading...</span>}
       </div>
-      {value && (
+
+      {hasImageValue && (
+        <div className="relative h-20 w-28 overflow-hidden rounded-sm border border-slate-200 bg-slate-100">
+          <Image
+            src={value}
+            alt={label || 'Uploaded image'}
+            fill
+            className="object-cover"
+            sizes="112px"
+          />
+        </div>
+      )}
+
+      {!imageAccept && value && (
         <input
           type="text"
           value={value}

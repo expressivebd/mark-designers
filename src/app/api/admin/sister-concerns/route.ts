@@ -33,6 +33,7 @@ function sanitizePayload(payload: Record<string, unknown>) {
 
   return {
     name,
+    tagline: String(payload?.tagline || '').trim(),
     slug,
     link: slug ? `/sister-concerns/${slug}` : '/sister-concerns',
     thumbnailUrl: String(payload?.thumbnailUrl || payload?.imageUrl || '').trim(),
