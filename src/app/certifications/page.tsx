@@ -29,7 +29,7 @@ export default async function CertificationsPage() {
       <section className="section-padding bg-white">
         <div className="container-custom">
           <div className="mb-10 text-center">
-            <h2 className="heading-secondary mb-2">Our Certification Logos</h2>
+            <h2 className="heading-secondary mb-2">Certifications & Compliance</h2>
             <div className="mx-auto h-1 w-16 bg-accent" />
           </div>
 

@@ -29,7 +29,7 @@ export default async function ClientsPage() {
       <section className="section-padding bg-white">
         <div className="container-custom">
           <div className="mb-10 text-center">
-            <h2 className="heading-secondary mb-2">Client Logos</h2>
+            <h2 className="heading-secondary mb-2">Client</h2>
             <div className="mx-auto h-1 w-16 bg-accent" />
           </div>
 

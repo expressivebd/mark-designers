@@ -27,6 +27,24 @@ export type HomepageData = {
   }>;
 };
 
+export type AboutFacilityItem = {
+  name: string;
+  imageUrl: string;
+};
+
+export type AboutExpertiseItem = {
+  name: string;
+  details: string;
+  imageUrl: string;
+};
+
+export type AboutPageData = {
+  journey: string;
+  stats: Array<{ label: string; number: number; suffix: string }>;
+  facilities: AboutFacilityItem[];
+  expertise: AboutExpertiseItem[];
+};
+
 export type SisterConcernItem = {
   id: string;
   name: string;
@@ -122,6 +140,14 @@ export async function getHomepage() {
   const doc = await db
     .collection<HomepageData & { _id: string }>('homepage')
     .findOne({ _id: 'homepage' });
+  return doc ? doc : null;
+}
+
+export async function getAboutPage() {
+  const db = await getDb();
+  const doc = await db
+    .collection<AboutPageData & { _id: string }>('aboutPage')
+    .findOne({ _id: 'about' });
   return doc ? doc : null;
 }
 

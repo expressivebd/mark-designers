@@ -15,6 +15,11 @@ export default function AdminDashboard() {
           href="/admin/homepage"
         />
         <AdminSectionCard
+          title="About Page"
+          description="Manage journey, stats, facilities, and expertise content."
+          href="/admin/about"
+        />
+        <AdminSectionCard
           title="Sister Concerns"
           description="Update sister concern cards and descriptions."
           href="/admin/sister-concerns"

@@ -1,94 +1,134 @@
 'use client';
 
+import { useEffect, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
 import CountUp from 'react-countup';
 import Image from 'next/image';
 import SEOHead from '@/components/SEOHead';
 
-const stats = [
+type AboutStat = {
+    label: string;
+    number: number;
+    suffix: string;
+};
+
+type FacilityItem = {
+    name: string;
+    imageUrl: string;
+};
+
+type ExpertiseItem = {
+    name: string;
+    details: string;
+    imageUrl: string;
+};
+
+type CertificationItem = {
+    id?: string;
+    name: string;
+    logoUrl: string;
+};
+
+type AboutPagePayload = {
+    about?: {
+        journey?: string;
+        stats?: AboutStat[];
+        facilities?: FacilityItem[];
+        expertise?: ExpertiseItem[];
+    };
+    certifications?: CertificationItem[];
+};
+
+const defaultStats: AboutStat[] = [
     { number: 3, suffix: '', label: 'Sister Concerns' },
     { number: 45000, suffix: '+', label: 'Daily Capacity (pcs)' },
     { number: 8000, suffix: '+', label: 'Personnel' },
     { number: 30, suffix: '+', label: 'Years Experience' },
 ];
 
-const expertiseItems = [
+const defaultExpertiseItems: ExpertiseItem[] = [
     {
-        title: 'Design',
-        description: 'Our experienced design team creates innovative patterns and styles that align with global fashion trends and client specifications.',
-        image: '/products/1.png',
+        name: 'Design',
+        details: 'Our experienced design team creates innovative patterns and styles that align with global fashion trends and client specifications.',
+        imageUrl: '/products/1.png',
     },
     {
-        title: 'Pattern',
-        description: 'Precision pattern making with state-of-the-art CAD systems ensuring perfect fit and minimal fabric wastage.',
-        image: '/products/2.png',
+        name: 'Pattern',
+        details: 'Precision pattern making with state-of-the-art CAD systems ensuring perfect fit and minimal fabric wastage.',
+        imageUrl: '/products/2.png',
     },
     {
-        title: 'Sampling',
-        description: 'Rapid prototyping and sampling capabilities to bring concepts to life quickly and accurately.',
-        image: '/products/3.png',
+        name: 'Sampling',
+        details: 'Rapid prototyping and sampling capabilities to bring concepts to life quickly and accurately.',
+        imageUrl: '/products/3.png',
     },
     {
-        title: 'Cutting',
-        description: 'Automated cutting systems with computerized marker making for maximum efficiency and precision.',
-        image: '/products/4.png',
+        name: 'Cutting',
+        details: 'Automated cutting systems with computerized marker making for maximum efficiency and precision.',
+        imageUrl: '/products/4.png',
     },
     {
-        title: 'Stitching',
-        description: 'Skilled operators and advanced sewing technology deliver superior craftsmanship on every garment.',
-        image: '/products/1.png',
+        name: 'Stitching',
+        details: 'Skilled operators and advanced sewing technology deliver superior craftsmanship on every garment.',
+        imageUrl: '/products/1.png',
     },
     {
-        title: 'Washing',
-        description: 'In-house washing facilities with eco-friendly processes for various finishes and treatments.',
-        image: '/products/2.png',
+        name: 'Washing',
+        details: 'In-house washing facilities with eco-friendly processes for various finishes and treatments.',
+        imageUrl: '/products/2.png',
     },
     {
-        title: 'Finishing',
-        description: 'Meticulous finishing processes including pressing, folding, and presentation to meet the highest standards.',
-        image: '/products/3.png',
+        name: 'Finishing',
+        details: 'Meticulous finishing processes including pressing, folding, and presentation to meet the highest standards.',
+        imageUrl: '/products/3.png',
     },
     {
-        title: 'Quality Control',
-        description: 'Rigorous multi-stage inspection processes ensuring every piece meets international quality standards.',
-        image: '/products/4.png',
+        name: 'Quality Control',
+        details: 'Rigorous multi-stage inspection processes ensuring every piece meets international quality standards.',
+        imageUrl: '/products/4.png',
     },
     {
-        title: 'Packing',
-        description: 'Custom packing solutions tailored to brand requirements with sustainable packaging options.',
-        image: '/products/1.png',
+        name: 'Packing',
+        details: 'Custom packing solutions tailored to brand requirements with sustainable packaging options.',
+        imageUrl: '/products/1.png',
     },
     {
-        title: 'Shipment',
-        description: 'Efficient logistics management ensuring timely delivery to destinations worldwide.',
-        image: '/products/2.png',
+        name: 'Shipment',
+        details: 'Efficient logistics management ensuring timely delivery to destinations worldwide.',
+        imageUrl: '/products/2.png',
     },
 ];
 
-const certifications = [
-    { name: 'ISO 9001', logo: '/certificates/1.png' },
-    { name: 'WRAP', logo: '/certificates/2.png' },
-    { name: 'BSCI', logo: '/certificates/3.png' },
-    { name: 'OEKO-TEX', logo: '/certificates/4.png' },
-    { name: 'Accord', logo: '/certificates/5.png' },
-    { name: 'RSC', logo: '/certificates/6.png' },
-    { name: 'SEDEX', logo: '/certificates/7.png' },
-    { name: 'GOTS', logo: '/certificates/8.png' },
-    { name: 'GRS', logo: '/certificates/9.png' },
-    { name: 'OCS', logo: '/certificates/10.png' },
-    { name: 'Higg', logo: '/certificates/11.png' },
-    { name: 'CTPAT', logo: '/certificates/12.png' },
+const defaultCertifications: CertificationItem[] = [
+    { name: 'ISO 9001', logoUrl: '/certificates/1.png' },
+    { name: 'WRAP', logoUrl: '/certificates/2.png' },
+    { name: 'BSCI', logoUrl: '/certificates/3.png' },
+    { name: 'OEKO-TEX', logoUrl: '/certificates/4.png' },
+    { name: 'Accord', logoUrl: '/certificates/5.png' },
+    { name: 'RSC', logoUrl: '/certificates/6.png' },
+    { name: 'SEDEX', logoUrl: '/certificates/7.png' },
+    { name: 'GOTS', logoUrl: '/certificates/8.png' },
+    { name: 'GRS', logoUrl: '/certificates/9.png' },
+    { name: 'OCS', logoUrl: '/certificates/10.png' },
+    { name: 'Higg', logoUrl: '/certificates/11.png' },
+    { name: 'CTPAT', logoUrl: '/certificates/12.png' },
 ];
 
-const machineryImages = [
-    { src: '/concerns/1.png', alt: 'Production Floor', span: 'col-span-2 row-span-2' },
-    { src: '/concerns/2.png', alt: 'Sewing Section', span: 'col-span-1 row-span-1' },
-    { src: '/concerns/3.png', alt: 'Cutting Section', span: 'col-span-1 row-span-1' },
-    { src: '/products/1.png', alt: 'Finishing Line', span: 'col-span-1 row-span-2' },
-    { src: '/products/2.png', alt: 'Quality Lab', span: 'col-span-1 row-span-1' },
-    { src: '/products/3.png', alt: 'Washing Plant', span: 'col-span-1 row-span-1' },
+const defaultFacilities: FacilityItem[] = [
+    { imageUrl: '/concerns/1.png', name: 'Production Floor' },
+    { imageUrl: '/concerns/2.png', name: 'Sewing Section' },
+    { imageUrl: '/concerns/3.png', name: 'Cutting Section' },
+    { imageUrl: '/products/1.png', name: 'Finishing Line' },
+    { imageUrl: '/products/2.png', name: 'Quality Lab' },
+    { imageUrl: '/products/3.png', name: 'Washing Plant' },
 ];
+
+const defaultJourney = [
+    'Since 1995, Mark Designers Ltd. has been a cornerstone of the Bangladeshi garment industry, serving clients across Europe, North America, and Asia with unwavering quality and commitment. What began as a single manufacturing unit has grown into a group of three state-of-the-art production facilities.',
+    'The company portfolio expanded by setting up two additional production facilities - Mark Wear Limited and Mark 2000 Limited. All three facilities are fully compliant under the supervision of Accord and RSC, maintaining the highest international standards in safety, quality, and ethical manufacturing.',
+    'Over three decades, we have built lasting partnerships with leading global brands, consistently delivering premium garments that meet the exacting standards of the international fashion industry. Our commitment to innovation, sustainability, and excellence continues to drive our growth.',
+].join('\n\n');
 
 export default function AboutPage() {
     const [historyRef, historyInView] = useInView({ triggerOnce: true, threshold: 0.2 });
@@ -96,6 +136,74 @@ export default function AboutPage() {
     const [machineryRef, machineryInView] = useInView({ triggerOnce: true, threshold: 0.1 });
     const [expertiseRef, expertiseInView] = useInView({ triggerOnce: true, threshold: 0.1 });
     const [certRef, certInView] = useInView({ triggerOnce: true, threshold: 0.1 });
+
+    const [journey, setJourney] = useState(defaultJourney);
+    const [stats, setStats] = useState(defaultStats);
+    const [facilities, setFacilities] = useState(defaultFacilities);
+    const [expertiseItems, setExpertiseItems] = useState(defaultExpertiseItems);
+    const [certifications, setCertifications] = useState(defaultCertifications);
+
+    useEffect(() => {
+        const loadAbout = async () => {
+            const response = await fetch('/api/about');
+            if (!response.ok) {
+                return;
+            }
+
+            const payload = (await response.json()) as AboutPagePayload;
+            const about = payload.about;
+
+            if (about?.journey) {
+                setJourney(String(about.journey));
+            }
+
+            if (Array.isArray(about?.stats) && about.stats.length > 0) {
+                setStats(
+                    about.stats.map((item) => ({
+                        label: String(item.label || ''),
+                        number: Number(item.number || 0),
+                        suffix: String(item.suffix || ''),
+                    }))
+                );
+            }
+
+            if (Array.isArray(about?.facilities) && about.facilities.length > 0) {
+                setFacilities(
+                    about.facilities.map((item) => ({
+                        name: String(item.name || ''),
+                        imageUrl: String(item.imageUrl || ''),
+                    }))
+                );
+            }
+
+            if (Array.isArray(about?.expertise) && about.expertise.length > 0) {
+                setExpertiseItems(
+                    about.expertise.map((item) => ({
+                        name: String(item.name || ''),
+                        details: String(item.details || ''),
+                        imageUrl: String(item.imageUrl || ''),
+                    }))
+                );
+            }
+
+            if (Array.isArray(payload.certifications) && payload.certifications.length > 0) {
+                setCertifications(
+                    payload.certifications.map((item) => ({
+                        id: item.id,
+                        name: String(item.name || ''),
+                        logoUrl: String(item.logoUrl || ''),
+                    }))
+                );
+            }
+        };
+
+        loadAbout();
+    }, []);
+
+    const journeyParagraphs = useMemo(
+        () => journey.split(/\n\s*\n/).map((part) => part.trim()).filter(Boolean),
+        [journey]
+    );
 
     return (
         <>
@@ -140,24 +248,9 @@ export default function AboutPage() {
                         <h2 className="heading-secondary text-center mb-8">Our Journey</h2>
                         <div className="w-16 h-1 bg-accent mx-auto mb-12" />
                         <div className="space-y-6 text-body">
-                            <p>
-                                Since 1995, Mark Designers Ltd. has been a cornerstone of the Bangladeshi garment
-                                industry, serving clients across Europe, North America, and Asia with unwavering
-                                quality and commitment. What began as a single manufacturing unit has grown into a
-                                group of three state-of-the-art production facilities.
-                            </p>
-                            <p>
-                                The company portfolio expanded by setting up two additional production facilities —
-                                Mark Wear Limited and Mark 2000 Limited. All three facilities are fully compliant
-                                under the supervision of Accord and RSC, maintaining the highest international
-                                standards in safety, quality, and ethical manufacturing.
-                            </p>
-                            <p>
-                                Over three decades, we have built lasting partnerships with leading global
-                                brands, consistently delivering premium garments that meet the exacting standards
-                                of the international fashion industry. Our commitment to innovation, sustainability,
-                                and excellence continues to drive our growth.
-                            </p>
+                            {journeyParagraphs.map((paragraph, index) => (
+                                <p key={index}>{paragraph}</p>
+                            ))}
                         </div>
                     </motion.div>
                 </div>
@@ -192,7 +285,7 @@ export default function AboutPage() {
                 </div>
             </section>
 
-            {/* Machinery Bento Box Section */}
+            {/* Facilities Section */}
             <section className="section-padding bg-slate-50">
                 <div className="container-custom">
                     <motion.div
@@ -210,23 +303,20 @@ export default function AboutPage() {
                         initial={{ opacity: 0 }}
                         animate={machineryInView ? { opacity: 1 } : {}}
                         transition={{ duration: 0.8, delay: 0.2 }}
-                        className="grid grid-cols-2 md:grid-cols-3 auto-rows-[200px] md:auto-rows-[250px] gap-3 md:gap-4"
+                        className="grid grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6"
                     >
-                        {machineryImages.map((img, index) => (
-                            <div
-                                key={index}
-                                className={`relative rounded-xl overflow-hidden group ${img.span}`}
-                            >
-                                <Image
-                                    src={img.src}
-                                    alt={img.alt}
-                                    fill
-                                    className="object-cover group-hover:scale-110 transition-transform duration-700"
-                                />
-                                <div className="absolute inset-0 bg-primary/0 group-hover:bg-primary/60 transition-all duration-300 flex items-center justify-center">
-                                    <span className="text-white font-playfair font-semibold text-lg md:text-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 translate-y-4 group-hover:translate-y-0">
-                                        {img.alt}
-                                    </span>
+                        {facilities.map((item, index) => (
+                            <div key={index} className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+                                <div className="relative h-40 md:h-48 w-full">
+                                    <Image
+                                        src={item.imageUrl}
+                                        alt={item.name}
+                                        fill
+                                        className="object-cover"
+                                    />
+                                </div>
+                                <div className="px-4 py-3 text-center">
+                                    <h3 className="text-sm md:text-base font-semibold text-primary">{item.name}</h3>
                                 </div>
                             </div>
                         ))}
@@ -264,8 +354,8 @@ export default function AboutPage() {
                                 {/* Image */}
                                 <div className="relative w-full md:w-2/5 h-64 md:h-80 overflow-hidden">
                                     <Image
-                                        src={item.image}
-                                        alt={item.title}
+                                        src={item.imageUrl}
+                                        alt={item.name}
                                         fill
                                         className="object-cover hover:scale-105 transition-transform duration-700"
                                     />
@@ -278,10 +368,10 @@ export default function AboutPage() {
                                             {String(index + 1).padStart(2, '0')}
                                         </span>
                                         <h3 className="text-2xl md:text-3xl lg:text-4xl font-playfair font-bold text-primary mt-2 mb-4">
-                                            {item.title}
+                                            {item.name}
                                         </h3>
                                         <p className="text-gray-600 leading-relaxed text-base md:text-lg">
-                                            {item.description}
+                                            {item.details}
                                         </p>
                                     </div>
                                 </div>
@@ -314,7 +404,7 @@ export default function AboutPage() {
                                 className="flex-shrink-0 w-[180px] h-[100px] bg-white rounded-lg shadow-md flex items-center justify-center p-4 mx-3 hover:shadow-xl hover:scale-105 transition-all duration-300"
                             >
                                 <Image
-                                    src={cert.logo}
+                                    src={cert.logoUrl}
                                     alt={cert.name}
                                     width={160}
                                     height={80}
