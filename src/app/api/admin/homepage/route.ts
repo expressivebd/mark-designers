@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { getDb } from '@/lib/mongodb';
 import { requireAdmin } from '@/lib/admin';
 import type { HomepageData } from '@/lib/data';
@@ -46,5 +47,6 @@ export async function PUT(request: Request) {
     { upsert: true }
   );
 
+  revalidatePath('/', 'layout');
   return NextResponse.json({ ok: true });
 }

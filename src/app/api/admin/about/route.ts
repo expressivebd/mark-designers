@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { getDb } from '@/lib/mongodb';
 import { requireAdmin } from '@/lib/admin';
 import type { AboutPageData } from '@/lib/data';
@@ -70,5 +71,6 @@ export async function PUT(request: Request) {
     { upsert: true }
   );
 
+  revalidatePath('/about');
   return NextResponse.json({ ok: true });
 }

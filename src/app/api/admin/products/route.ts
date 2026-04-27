@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { ObjectId } from 'mongodb';
 import { getDb } from '@/lib/mongodb';
 import { requireAdmin } from '@/lib/admin';
@@ -129,6 +130,7 @@ export async function POST(request: Request) {
       updatedAt: new Date(),
     });
 
+    revalidatePath('/', 'layout');
     return NextResponse.json({ id: result.insertedId.toString(), name });
   }
 
@@ -156,6 +158,7 @@ export async function POST(request: Request) {
       updatedAt: new Date(),
     });
 
+    revalidatePath('/', 'layout');
     return NextResponse.json({ id: result.insertedId.toString() });
   }
 
@@ -187,6 +190,7 @@ export async function PUT(request: Request) {
       }
     );
 
+    revalidatePath('/', 'layout');
     return NextResponse.json({ ok: true });
   }
 
@@ -215,6 +219,7 @@ export async function PUT(request: Request) {
     }
   );
 
+  revalidatePath('/', 'layout');
   return NextResponse.json({ ok: true });
 }
 
@@ -238,6 +243,7 @@ export async function DELETE(request: Request) {
       db.collection('products').deleteMany({ categoryId: categoryId.toString() }),
     ]);
 
+    revalidatePath('/', 'layout');
     return NextResponse.json({ ok: true });
   }
 
@@ -247,5 +253,6 @@ export async function DELETE(request: Request) {
   }
 
   await db.collection('products').deleteOne({ _id: productId });
+  revalidatePath('/', 'layout');
   return NextResponse.json({ ok: true });
 }

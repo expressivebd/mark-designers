@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { ObjectId } from 'mongodb';
 import { requireAdmin } from '@/lib/admin';
 import { getDb } from '@/lib/mongodb';
@@ -89,6 +90,7 @@ export async function POST(request: Request) {
 
   const db = await getDb();
   const result = await db.collection('contactAddresses').insertOne(doc);
+  revalidatePath('/contact');
   return NextResponse.json({ id: result.insertedId.toString(), ...doc });
 }
 
@@ -114,6 +116,7 @@ export async function PUT(request: Request) {
     }
   );
 
+  revalidatePath('/contact');
   return NextResponse.json({ ok: true });
 }
 
@@ -130,5 +133,6 @@ export async function DELETE(request: Request) {
 
   const db = await getDb();
   await db.collection('contactAddresses').deleteOne({ _id: new ObjectId(String(payload.id)) });
+  revalidatePath('/contact');
   return NextResponse.json({ ok: true });
 }
