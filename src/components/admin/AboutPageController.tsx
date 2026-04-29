@@ -44,6 +44,19 @@ const defaultData: AboutPageData = {
 const emptyFacility: FacilityItem = { name: '', imageUrl: '' };
 const emptyExpertise: ExpertiseItem = { name: '', details: '', imageUrl: '' };
 
+function DragHandle() {
+  return (
+    <svg
+      className="w-4 h-4 flex-shrink-0 text-slate-300"
+      fill="currentColor"
+      viewBox="0 0 20 20"
+      aria-hidden="true"
+    >
+      <path d="M7 2a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM7 8a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM7 14a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM13 2a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM13 8a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM13 14a2 2 0 1 0 0 4 2 2 0 0 0 0-4z" />
+    </svg>
+  );
+}
+
 export default function AboutPageController() {
   const [data, setData] = useState<AboutPageData>(defaultData);
   const [facilityDraft, setFacilityDraft] = useState<FacilityItem>(emptyFacility);
@@ -55,6 +68,14 @@ export default function AboutPageController() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [status, setStatus] = useState('');
+
+  // Drag state for facilities
+  const [facilityDragIndex, setFacilityDragIndex] = useState<number | null>(null);
+  const [facilityDragOverIndex, setFacilityDragOverIndex] = useState<number | null>(null);
+
+  // Drag state for expertise
+  const [expertiseDragIndex, setExpertiseDragIndex] = useState<number | null>(null);
+  const [expertiseDragOverIndex, setExpertiseDragOverIndex] = useState<number | null>(null);
 
   useEffect(() => {
     const loadData = async () => {
@@ -102,6 +123,82 @@ export default function AboutPageController() {
 
     loadData();
   }, []);
+
+  // ── Facility drag handlers ──────────────────────────────────────────────────
+
+  const handleFacilityDragStart = (event: React.DragEvent, index: number) => {
+    setFacilityDragIndex(index);
+    event.dataTransfer.effectAllowed = 'move';
+  };
+
+  const handleFacilityDragOver = (event: React.DragEvent, index: number) => {
+    event.preventDefault();
+    event.dataTransfer.dropEffect = 'move';
+    if (index !== facilityDragIndex) {
+      setFacilityDragOverIndex(index);
+    }
+  };
+
+  const handleFacilityDrop = (event: React.DragEvent, dropIndex: number) => {
+    event.preventDefault();
+    if (facilityDragIndex === null || facilityDragIndex === dropIndex) {
+      setFacilityDragIndex(null);
+      setFacilityDragOverIndex(null);
+      return;
+    }
+    setData((prev) => {
+      const items = [...prev.facilities];
+      const [dragged] = items.splice(facilityDragIndex, 1);
+      items.splice(dropIndex, 0, dragged);
+      return { ...prev, facilities: items };
+    });
+    setFacilityDragIndex(null);
+    setFacilityDragOverIndex(null);
+  };
+
+  const handleFacilityDragEnd = () => {
+    setFacilityDragIndex(null);
+    setFacilityDragOverIndex(null);
+  };
+
+  // ── Expertise drag handlers ─────────────────────────────────────────────────
+
+  const handleExpertiseDragStart = (event: React.DragEvent, index: number) => {
+    setExpertiseDragIndex(index);
+    event.dataTransfer.effectAllowed = 'move';
+  };
+
+  const handleExpertiseDragOver = (event: React.DragEvent, index: number) => {
+    event.preventDefault();
+    event.dataTransfer.dropEffect = 'move';
+    if (index !== expertiseDragIndex) {
+      setExpertiseDragOverIndex(index);
+    }
+  };
+
+  const handleExpertiseDrop = (event: React.DragEvent, dropIndex: number) => {
+    event.preventDefault();
+    if (expertiseDragIndex === null || expertiseDragIndex === dropIndex) {
+      setExpertiseDragIndex(null);
+      setExpertiseDragOverIndex(null);
+      return;
+    }
+    setData((prev) => {
+      const items = [...prev.expertise];
+      const [dragged] = items.splice(expertiseDragIndex, 1);
+      items.splice(dropIndex, 0, dragged);
+      return { ...prev, expertise: items };
+    });
+    setExpertiseDragIndex(null);
+    setExpertiseDragOverIndex(null);
+  };
+
+  const handleExpertiseDragEnd = () => {
+    setExpertiseDragIndex(null);
+    setExpertiseDragOverIndex(null);
+  };
+
+  // ── CRUD handlers ───────────────────────────────────────────────────────────
 
   const saveFacility = () => {
     if (!facilityDraft.name.trim() || !facilityDraft.imageUrl.trim()) {
@@ -229,8 +326,9 @@ export default function AboutPageController() {
         />
       </div>
 
+      {/* ── The Process ─────────────────────────────────────────────────────── */}
       <div className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm space-y-4">
-        <h2 className="text-xl font-playfair font-semibold text-primary">Our Facilities</h2>
+        <h2 className="text-xl font-playfair font-semibold text-primary">The Process</h2>
         <div className="grid gap-4 md:grid-cols-2">
           <div className="space-y-2">
             <label className="block text-sm font-medium text-primary">Facility Name</label>
@@ -267,97 +365,119 @@ export default function AboutPageController() {
         </div>
 
         {data.facilities.length > 0 && (
-          <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
-            {data.facilities.map((item, index) => (
-              <div key={`${item.name}-${index}`} className="rounded-md border border-slate-200 p-3 space-y-2">
-                {facilityEditIndex === index ? (
-                  <>
-                    <div className="space-y-2">
-                      <label className="block text-xs font-medium text-primary">Facility Name</label>
-                      <input
-                        type="text"
-                        value={facilityEditDraft.name}
-                        onChange={(event) =>
-                          setFacilityEditDraft((prev) => ({ ...prev, name: event.target.value }))
-                        }
-                        className="w-full rounded-sm border border-slate-200 px-3 py-2 text-sm"
-                      />
-                    </div>
-
-                    <UploadField
-                      label="Facility Photo"
-                      value={facilityEditDraft.imageUrl}
-                      folder="facilities"
-                      accept=".jpg,.jpeg,.png,image/jpeg,image/png"
-                      onChange={(url) => setFacilityEditDraft((prev) => ({ ...prev, imageUrl: url }))}
-                    />
-
-                    <div className="flex gap-2">
-                      <button
-                        type="button"
-                        onClick={saveFacilityEdit}
-                        className="rounded-sm bg-primary px-3 py-1 text-xs font-medium text-white"
-                      >
-                        Save
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setFacilityEditIndex(null);
-                          setFacilityEditDraft(emptyFacility);
-                        }}
-                        className="rounded-sm border border-slate-200 px-3 py-1 text-xs font-medium text-primary"
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <p className="text-sm font-medium text-primary">{item.name}</p>
-                    {item.imageUrl && (
-                      <div className="relative h-24 w-32 overflow-hidden rounded-sm border border-slate-200 bg-slate-100">
-                        <Image
-                          src={item.imageUrl}
-                          alt={item.name}
-                          fill
-                          className="object-cover"
-                          sizes="128px"
+          <>
+            <p className="text-xs text-slate-400">Drag cards to reorder. The frontend will reflect this order.</p>
+            <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+              {data.facilities.map((item, index) => (
+                <div
+                  key={index}
+                  draggable={facilityEditIndex === null}
+                  onDragStart={(event) => { if (facilityEditIndex === null) handleFacilityDragStart(event, index); }}
+                  onDragOver={(event) => handleFacilityDragOver(event, index)}
+                  onDrop={(event) => handleFacilityDrop(event, index)}
+                  onDragEnd={handleFacilityDragEnd}
+                  className={`rounded-md border p-3 space-y-2 transition-all duration-150 select-none ${
+                    facilityDragIndex === index
+                      ? 'opacity-40 border-slate-300 bg-slate-50 scale-95'
+                      : facilityDragOverIndex === index && facilityDragIndex !== null
+                        ? 'border-primary border-dashed bg-primary/5 scale-[1.02]'
+                        : 'border-slate-200 bg-white'
+                  }`}
+                  style={{ cursor: facilityEditIndex === null ? (facilityDragIndex === index ? 'grabbing' : 'grab') : 'default' }}
+                >
+                  {facilityEditIndex === index ? (
+                    <>
+                      <div className="space-y-2">
+                        <label className="block text-xs font-medium text-primary">Facility Name</label>
+                        <input
+                          type="text"
+                          value={facilityEditDraft.name}
+                          onChange={(event) =>
+                            setFacilityEditDraft((prev) => ({ ...prev, name: event.target.value }))
+                          }
+                          className="w-full rounded-sm border border-slate-200 px-3 py-2 text-sm"
                         />
                       </div>
-                    )}
-                    <div className="flex gap-2">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setFacilityEditIndex(index);
-                          setFacilityEditDraft(item);
-                        }}
-                        className="rounded-sm border border-slate-200 px-3 py-1 text-xs font-medium text-primary"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setData((prev) => ({
-                            ...prev,
-                            facilities: prev.facilities.filter((_, itemIndex) => itemIndex !== index),
-                          }));
-                        }}
-                        className="rounded-sm border border-red-200 px-3 py-1 text-xs font-medium text-red-600"
-                      >
-                        Remove
-                      </button>
-                    </div>
-                  </>
-                )}
-              </div>
-            ))}
-          </div>
+
+                      <UploadField
+                        label="Facility Photo"
+                        value={facilityEditDraft.imageUrl}
+                        folder="facilities"
+                        accept=".jpg,.jpeg,.png,image/jpeg,image/png"
+                        onChange={(url) => setFacilityEditDraft((prev) => ({ ...prev, imageUrl: url }))}
+                      />
+
+                      <div className="flex gap-2">
+                        <button
+                          type="button"
+                          onClick={saveFacilityEdit}
+                          className="rounded-sm bg-primary px-3 py-1 text-xs font-medium text-white"
+                        >
+                          Save
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setFacilityEditIndex(null);
+                            setFacilityEditDraft(emptyFacility);
+                          }}
+                          className="rounded-sm border border-slate-200 px-3 py-1 text-xs font-medium text-primary"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="flex items-center gap-2 pb-1">
+                        <DragHandle />
+                        <p className="text-sm font-medium text-primary truncate">{item.name}</p>
+                      </div>
+                      {item.imageUrl && (
+                        <div className="relative h-24 w-32 overflow-hidden rounded-sm border border-slate-200 bg-slate-100">
+                          <Image
+                            src={item.imageUrl}
+                            alt={item.name}
+                            fill
+                            className="object-cover"
+                            sizes="128px"
+                          />
+                        </div>
+                      )}
+                      <div className="flex gap-2">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setFacilityEditIndex(index);
+                            setFacilityEditDraft(item);
+                          }}
+                          className="rounded-sm border border-slate-200 px-3 py-1 text-xs font-medium text-primary"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setData((prev) => ({
+                              ...prev,
+                              facilities: prev.facilities.filter((_, itemIndex) => itemIndex !== index),
+                            }));
+                          }}
+                          className="rounded-sm border border-red-200 px-3 py-1 text-xs font-medium text-red-600"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    </>
+                  )}
+                </div>
+              ))}
+            </div>
+          </>
         )}
       </div>
 
+      {/* ── Our Expertise ───────────────────────────────────────────────────── */}
       <div className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm space-y-4">
         <h2 className="text-xl font-playfair font-semibold text-primary">Our Expertise</h2>
         <div className="grid gap-4 md:grid-cols-2">
@@ -405,107 +525,128 @@ export default function AboutPageController() {
         </div>
 
         {data.expertise.length > 0 && (
-          <div className="grid gap-3 md:grid-cols-2">
-            {data.expertise.map((item, index) => (
-              <div key={`${item.name}-${index}`} className="rounded-md border border-slate-200 p-3 space-y-2">
-                {expertiseEditIndex === index ? (
-                  <>
-                    <div className="space-y-2">
-                      <label className="block text-xs font-medium text-primary">Expertise Name</label>
-                      <input
-                        type="text"
-                        value={expertiseEditDraft.name}
-                        onChange={(event) =>
-                          setExpertiseEditDraft((prev) => ({ ...prev, name: event.target.value }))
-                        }
-                        className="w-full rounded-sm border border-slate-200 px-3 py-2 text-sm"
-                      />
-                    </div>
-
-                    <UploadField
-                      label="Expertise Photo"
-                      value={expertiseEditDraft.imageUrl}
-                      folder="expertise"
-                      accept=".jpg,.jpeg,.png,image/jpeg,image/png"
-                      onChange={(url) => setExpertiseEditDraft((prev) => ({ ...prev, imageUrl: url }))}
-                    />
-
-                    <div className="space-y-2">
-                      <label className="block text-xs font-medium text-primary">Details</label>
-                      <textarea
-                        value={expertiseEditDraft.details}
-                        onChange={(event) =>
-                          setExpertiseEditDraft((prev) => ({ ...prev, details: event.target.value }))
-                        }
-                        className="w-full rounded-sm border border-slate-200 px-3 py-2 text-sm"
-                        rows={3}
-                      />
-                    </div>
-
-                    <div className="flex gap-2">
-                      <button
-                        type="button"
-                        onClick={saveExpertiseEdit}
-                        className="rounded-sm bg-primary px-3 py-1 text-xs font-medium text-white"
-                      >
-                        Save
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setExpertiseEditIndex(null);
-                          setExpertiseEditDraft(emptyExpertise);
-                        }}
-                        className="rounded-sm border border-slate-200 px-3 py-1 text-xs font-medium text-primary"
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <p className="text-sm font-medium text-primary">{item.name}</p>
-                    <p className="text-xs text-gray-500">{item.details}</p>
-                    {item.imageUrl && (
-                      <div className="relative h-24 w-32 overflow-hidden rounded-sm border border-slate-200 bg-slate-100">
-                        <Image
-                          src={item.imageUrl}
-                          alt={item.name}
-                          fill
-                          className="object-cover"
-                          sizes="128px"
+          <>
+            <p className="text-xs text-slate-400">Drag cards to reorder. The frontend will reflect this order.</p>
+            <div className="grid gap-3 md:grid-cols-2">
+              {data.expertise.map((item, index) => (
+                <div
+                  key={index}
+                  draggable={expertiseEditIndex === null}
+                  onDragStart={(event) => { if (expertiseEditIndex === null) handleExpertiseDragStart(event, index); }}
+                  onDragOver={(event) => handleExpertiseDragOver(event, index)}
+                  onDrop={(event) => handleExpertiseDrop(event, index)}
+                  onDragEnd={handleExpertiseDragEnd}
+                  className={`rounded-md border p-3 space-y-2 transition-all duration-150 select-none ${
+                    expertiseDragIndex === index
+                      ? 'opacity-40 border-slate-300 bg-slate-50 scale-95'
+                      : expertiseDragOverIndex === index && expertiseDragIndex !== null
+                        ? 'border-primary border-dashed bg-primary/5 scale-[1.02]'
+                        : 'border-slate-200 bg-white'
+                  }`}
+                  style={{ cursor: expertiseEditIndex === null ? (expertiseDragIndex === index ? 'grabbing' : 'grab') : 'default' }}
+                >
+                  {expertiseEditIndex === index ? (
+                    <>
+                      <div className="space-y-2">
+                        <label className="block text-xs font-medium text-primary">Expertise Name</label>
+                        <input
+                          type="text"
+                          value={expertiseEditDraft.name}
+                          onChange={(event) =>
+                            setExpertiseEditDraft((prev) => ({ ...prev, name: event.target.value }))
+                          }
+                          className="w-full rounded-sm border border-slate-200 px-3 py-2 text-sm"
                         />
                       </div>
-                    )}
-                    <div className="flex gap-2">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setExpertiseEditIndex(index);
-                          setExpertiseEditDraft(item);
-                        }}
-                        className="rounded-sm border border-slate-200 px-3 py-1 text-xs font-medium text-primary"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setData((prev) => ({
-                            ...prev,
-                            expertise: prev.expertise.filter((_, itemIndex) => itemIndex !== index),
-                          }));
-                        }}
-                        className="rounded-sm border border-red-200 px-3 py-1 text-xs font-medium text-red-600"
-                      >
-                        Remove
-                      </button>
-                    </div>
-                  </>
-                )}
-              </div>
-            ))}
-          </div>
+
+                      <UploadField
+                        label="Expertise Photo"
+                        value={expertiseEditDraft.imageUrl}
+                        folder="expertise"
+                        accept=".jpg,.jpeg,.png,image/jpeg,image/png"
+                        onChange={(url) => setExpertiseEditDraft((prev) => ({ ...prev, imageUrl: url }))}
+                      />
+
+                      <div className="space-y-2">
+                        <label className="block text-xs font-medium text-primary">Details</label>
+                        <textarea
+                          value={expertiseEditDraft.details}
+                          onChange={(event) =>
+                            setExpertiseEditDraft((prev) => ({ ...prev, details: event.target.value }))
+                          }
+                          className="w-full rounded-sm border border-slate-200 px-3 py-2 text-sm"
+                          rows={3}
+                        />
+                      </div>
+
+                      <div className="flex gap-2">
+                        <button
+                          type="button"
+                          onClick={saveExpertiseEdit}
+                          className="rounded-sm bg-primary px-3 py-1 text-xs font-medium text-white"
+                        >
+                          Save
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setExpertiseEditIndex(null);
+                            setExpertiseEditDraft(emptyExpertise);
+                          }}
+                          className="rounded-sm border border-slate-200 px-3 py-1 text-xs font-medium text-primary"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="flex items-center gap-2 pb-1">
+                        <DragHandle />
+                        <p className="text-sm font-medium text-primary truncate">{item.name}</p>
+                      </div>
+                      <p className="text-xs text-gray-500 line-clamp-2">{item.details}</p>
+                      {item.imageUrl && (
+                        <div className="relative h-24 w-32 overflow-hidden rounded-sm border border-slate-200 bg-slate-100">
+                          <Image
+                            src={item.imageUrl}
+                            alt={item.name}
+                            fill
+                            className="object-cover"
+                            sizes="128px"
+                          />
+                        </div>
+                      )}
+                      <div className="flex gap-2">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setExpertiseEditIndex(index);
+                            setExpertiseEditDraft(item);
+                          }}
+                          className="rounded-sm border border-slate-200 px-3 py-1 text-xs font-medium text-primary"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setData((prev) => ({
+                              ...prev,
+                              expertise: prev.expertise.filter((_, itemIndex) => itemIndex !== index),
+                            }));
+                          }}
+                          className="rounded-sm border border-red-200 px-3 py-1 text-xs font-medium text-red-600"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    </>
+                  )}
+                </div>
+              ))}
+            </div>
+          </>
         )}
       </div>
 

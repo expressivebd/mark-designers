@@ -1,9 +1,11 @@
 import Image from 'next/image';
 import SEOHead from '@/components/SEOHead';
-import { getClients, getClientStats } from '@/lib/data';
+import { getClients } from '@/lib/data';
+
+export const revalidate = 3600;
 
 export default async function ClientsPage() {
-  const [clients, stats] = await Promise.all([getClients(), getClientStats()]);
+  const clients = await getClients();
 
   return (
     <>
@@ -29,7 +31,7 @@ export default async function ClientsPage() {
       <section className="section-padding bg-white">
         <div className="container-custom">
           <div className="mb-10 text-center">
-            <h2 className="heading-secondary mb-2">Client</h2>
+            <h2 className="heading-secondary mb-2">Clients</h2>
             <div className="mx-auto h-1 w-16 bg-accent" />
           </div>
 
@@ -45,25 +47,6 @@ export default async function ClientsPage() {
                 </div>
               </article>
             ))}
-          </div>
-
-          <div className="mt-14 grid grid-cols-2 gap-6 md:grid-cols-4">
-            <div className="text-center">
-              <p className="text-3xl font-playfair font-bold text-primary">{stats.totalClients}</p>
-              <p className="mt-2 text-sm text-slate-600">Total Number Of Client</p>
-            </div>
-            <div className="text-center">
-              <p className="text-3xl font-playfair font-bold text-primary">{stats.countriesServed || '-'}</p>
-              <p className="mt-2 text-sm text-slate-600">Total Countries Served</p>
-            </div>
-            <div className="text-center">
-              <p className="text-3xl font-playfair font-bold text-primary">{stats.yearsServed || '-'}</p>
-              <p className="mt-2 text-sm text-slate-600">Years Served</p>
-            </div>
-            <div className="text-center">
-              <p className="text-3xl font-playfair font-bold text-primary">{stats.satisfactionPercentage || '-'}</p>
-              <p className="mt-2 text-sm text-slate-600">Client Satisfaction Percentage</p>
-            </div>
           </div>
         </div>
       </section>

@@ -20,7 +20,7 @@ const defaultAbout = {
     { label: 'Years of Experience', number: 0, suffix: '+' },
     { label: 'Certifications', number: 0, suffix: '+' },
     { label: 'Clients Served', number: 0, suffix: '+' },
-    { label: 'Daily Outputs', number: 0, suffix: '+' },
+    { label: 'Pieces Daily', number: 0, suffix: '+' },
   ],
 };
 
@@ -111,9 +111,6 @@ export default function HomepageAdmin() {
           </Link>
           <Link href="/admin/client-management" className="rounded-sm border border-slate-200 px-4 py-3 text-sm font-medium text-primary hover:border-accent">
             Client Management
-          </Link>
-          <Link href="/admin/news-management" className="rounded-sm border border-slate-200 px-4 py-3 text-sm font-medium text-primary hover:border-accent">
-            News Management
           </Link>
         </div>
       </AdminCard>

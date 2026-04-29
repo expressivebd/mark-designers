@@ -2,6 +2,8 @@ import Image from 'next/image';
 import SEOHead from '@/components/SEOHead';
 import { getCertifications } from '@/lib/data';
 
+export const revalidate = 3600;
+
 export default async function CertificationsPage() {
   const certifications = await getCertifications();
 

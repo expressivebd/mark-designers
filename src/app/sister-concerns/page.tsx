@@ -2,6 +2,8 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { getSisterConcerns } from '@/lib/data';
 
+export const revalidate = 3600;
+
 export default async function SisterConcernsPage() {
     const concerns = await getSisterConcerns();
 
@@ -18,12 +20,12 @@ export default async function SisterConcernsPage() {
                 <div className="absolute inset-0 bg-black/50" />
                 <div className="relative z-10 text-center px-4">
                     <h1 className="text-4xl md:text-6xl lg:text-8xl font-playfair font-bold text-white tracking-tight">
-                        SISTER CONCERNS
+                        OUR FACILITIES
                     </h1>
                     <div className="w-24 h-1 bg-accent mx-auto mt-6" />
-                    <p className="text-white/80 mt-6 text-lg md:text-xl max-w-2xl mx-auto font-light">
+                    {/* <p className="text-white/80 mt-6 text-lg md:text-xl max-w-2xl mx-auto font-light">
                         Shared details managed from admin and displayed across all concern pages
-                    </p>
+                    </p> */}
                 </div>
             </section>
 

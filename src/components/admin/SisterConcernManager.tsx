@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import Image from 'next/image';
 import UploadField from './UploadField';
 import ConfirmDialog from './ConfirmDialog';
 
@@ -67,6 +68,10 @@ export default function SisterConcernManager() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
 
+  // Temp upload state for factory photos (separate for create vs edit forms)
+  const [formPhotoKey, setFormPhotoKey] = useState(0);
+  const [editPhotoKey, setEditPhotoKey] = useState(0);
+
   const fetchItems = useCallback(async () => {
     setIsLoading(true);
     setError('');
@@ -119,6 +124,7 @@ export default function SisterConcernManager() {
     }
 
     setForm(emptyForm());
+    setFormPhotoKey((k) => k + 1);
     fetchItems();
   };
 
@@ -142,6 +148,7 @@ export default function SisterConcernManager() {
 
     setEditId(null);
     setEditForm(emptyForm());
+    setEditPhotoKey((k) => k + 1);
     fetchItems();
   };
 
@@ -162,14 +169,6 @@ export default function SisterConcernManager() {
     fetchItems();
   };
 
-  const requestDelete = (id: string, name: string) => {
-    setDeleteTarget({ id, name });
-  };
-
-  const cancelDelete = () => {
-    setDeleteTarget(null);
-  };
-
   const confirmDelete = async () => {
     if (!deleteTarget) {
       return;
@@ -182,41 +181,58 @@ export default function SisterConcernManager() {
   const renderFactoryPhotoEditor = (
     photos: string[],
     onChange: (next: string[]) => void,
-    folderSuffix: string
+    folderSuffix: string,
+    uploadKey: number,
+    onUploadKeyReset: () => void
   ) => {
     return (
       <div className="space-y-3">
         <label className="block text-sm font-medium text-primary">Factory Photos</label>
-        {photos.map((photo, index) => (
-          <div key={`${photo}-${index}`} className="rounded-md border border-slate-200 p-3">
-            <div className="text-xs font-medium text-slate-500 mb-2">Photo {index + 1}</div>
-            <UploadField
-              label=""
-              value={photo}
-              folder={`sister-concerns/${folderSuffix}`}
-              accept="image/*"
-              onChange={(url) => {
-                const next = [...photos];
-                next[index] = url;
-                onChange(next);
-              }}
-            />
-            <button
-              type="button"
-              onClick={() => onChange(photos.filter((_, i) => i !== index))}
-              className="mt-2 rounded-sm border border-red-200 px-3 py-1 text-xs font-medium text-red-600 hover:border-red-400"
-            >
-              Remove Photo
-            </button>
+
+        {/* Always-visible upload field — auto-adds on successful upload */}
+        <div key={uploadKey}>
+          <UploadField
+            label="Add Factory Photo"
+            value=""
+            folder={`sister-concerns/${folderSuffix}`}
+            accept="image/*"
+            onChange={(url) => {
+              if (url) {
+                onChange([...photos, url]);
+                onUploadKeyReset();
+              }
+            }}
+          />
+        </div>
+
+        {/* Uploaded photos grid */}
+        {photos.length > 0 && (
+          <div className="flex flex-wrap gap-3 pt-1">
+            {photos.map((photo, index) => (
+              <div key={`${photo}-${index}`} className="relative">
+                <div className="relative h-24 w-24 overflow-hidden rounded-md border border-slate-200 bg-slate-100">
+                  <Image
+                    src={photo}
+                    alt={`Factory photo ${index + 1}`}
+                    fill
+                    className="object-cover"
+                    sizes="96px"
+                  />
+                </div>
+                <button
+                  type="button"
+                  onClick={() => onChange(photos.filter((_, i) => i !== index))}
+                  className="absolute -top-1.5 -right-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-white shadow-sm hover:bg-red-600 transition-colors"
+                  title="Remove photo"
+                >
+                  <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            ))}
           </div>
-        ))}
-        <button
-          type="button"
-          onClick={() => onChange([...photos, ''])}
-          className="rounded-sm border border-slate-300 px-3 py-2 text-sm font-medium text-primary hover:border-primary"
-        >
-          Add Factory Photo
-        </button>
+        )}
       </div>
     );
   };
@@ -227,7 +243,9 @@ export default function SisterConcernManager() {
     slug: string,
     link: string,
     yearsInOperation: number,
-    folderSuffix: string
+    folderSuffix: string,
+    photoUploadKey: number,
+    onPhotoKeyReset: () => void
   ) => {
     return (
       <div className="grid gap-4">
@@ -356,9 +374,13 @@ export default function SisterConcernManager() {
           </div>
         </div>
 
-        {renderFactoryPhotoEditor(values.factoryPhotos, (next) => {
-          setValues((prev) => ({ ...prev, factoryPhotos: next }));
-        }, folderSuffix)}
+        {renderFactoryPhotoEditor(
+          values.factoryPhotos,
+          (next) => setValues((prev) => ({ ...prev, factoryPhotos: next })),
+          folderSuffix,
+          photoUploadKey,
+          onPhotoKeyReset
+        )}
       </div>
     );
   };
@@ -373,7 +395,9 @@ export default function SisterConcernManager() {
           formSlug,
           formLink,
           formYearsInOperation,
-          formSlug || 'new'
+          formSlug || 'new',
+          formPhotoKey,
+          () => setFormPhotoKey((k) => k + 1)
         )}
         <button
           type="button"
@@ -400,7 +424,9 @@ export default function SisterConcernManager() {
                     editSlug,
                     editLink,
                     editYearsInOperation,
-                    editSlug || 'edit'
+                    editSlug || 'edit',
+                    editPhotoKey,
+                    () => setEditPhotoKey((k) => k + 1)
                   )}
                   <div className="flex gap-2">
                     <button
@@ -415,6 +441,7 @@ export default function SisterConcernManager() {
                       onClick={() => {
                         setEditId(null);
                         setEditForm(emptyForm());
+                        setEditPhotoKey((k) => k + 1);
                       }}
                       className="rounded-sm border border-slate-200 px-4 py-2 text-sm font-medium text-primary"
                     >
@@ -486,7 +513,7 @@ export default function SisterConcernManager() {
                     </button>
                     <button
                       type="button"
-                      onClick={() => requestDelete(item.id, item.name)}
+                      onClick={() => setDeleteTarget({ id: item.id, name: item.name })}
                       className="rounded-sm border border-red-200 px-4 py-2 text-sm font-medium text-red-600 hover:border-red-400"
                     >
                       Delete
@@ -508,7 +535,7 @@ export default function SisterConcernManager() {
         confirmLabel="Confirm"
         cancelLabel="Cancel"
         onConfirm={confirmDelete}
-        onCancel={cancelDelete}
+        onCancel={() => setDeleteTarget(null)}
       />
     </div>
   );

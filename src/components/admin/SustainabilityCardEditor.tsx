@@ -44,15 +44,6 @@ const SustainabilityCardEditor = ({ index, value, onChange }: SustainabilityCard
           rows={3}
         />
       </div>
-      <div className="space-y-2">
-        <label className="block text-sm font-medium text-primary">Link</label>
-        <input
-          type="text"
-          value={value.link}
-          onChange={(event) => onChange({ ...value, link: event.target.value })}
-          className="w-full rounded-sm border border-slate-200 px-3 py-2 text-sm"
-        />
-      </div>
     </div>
   );
 };

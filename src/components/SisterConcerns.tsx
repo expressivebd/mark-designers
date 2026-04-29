@@ -33,7 +33,7 @@ const SisterConcerns = ({ items }: { items?: SisterConcernItem[] }) => {
           transition={{ duration: 0.6 }}
           className="text-center mb-16"
         >
-          <h2 className="heading-primary">Sister Concerns</h2>
+          <h2 className="heading-primary">Our Facilities</h2>
           <div className="w-24 h-1 bg-accent mx-auto mt-4" />
         </motion.div>
 

@@ -2,6 +2,8 @@ import { notFound } from 'next/navigation';
 import SisterConcernDetail from '@/components/SisterConcernDetail';
 import { getSisterConcernBySlug } from '@/lib/data';
 
+export const revalidate = 3600;
+
 type Params = {
   slug: string;
 };

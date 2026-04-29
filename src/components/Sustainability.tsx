@@ -107,7 +107,7 @@ const Sustainability = ({ items }: { items?: SustainabilityItem[] }) => {
                       <p className="text-gray-700 text-sm lg:text-base leading-relaxed mb-4">
                         {item.description}
                       </p>
-                      <a
+                      {/* <a
                         href={item.link}
                         className="inline-flex items-center gap-2 text-primary font-semibold text-sm hover:text-accent transition-colors"
                       >
@@ -115,7 +115,7 @@ const Sustainability = ({ items }: { items?: SustainabilityItem[] }) => {
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
                         </svg>
-                      </a>
+                      </a> */}
                     </div>
                   </div>
                 </div>
@@ -175,7 +175,7 @@ const Sustainability = ({ items }: { items?: SustainabilityItem[] }) => {
                         <p className="text-gray-700 text-sm leading-relaxed mb-3">
                           {item.description}
                         </p>
-                        <a
+                        {/* <a
                           href={item.link}
                           className="inline-flex items-center gap-2 text-primary font-semibold text-sm hover:text-accent transition-colors"
                         >
@@ -183,7 +183,7 @@ const Sustainability = ({ items }: { items?: SustainabilityItem[] }) => {
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
                           </svg>
-                        </a>
+                        </a> */}
                       </div>
                     </div>
                   </div>

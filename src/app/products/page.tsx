@@ -3,6 +3,8 @@ import SEOHead from '@/components/SEOHead';
 import { getProductCategories } from '@/lib/data';
 import ProductGrid from '@/components/ProductGrid';
 
+export const revalidate = 3600;
+
 export default async function ProductsPage() {
   const categories = await getProductCategories();
   const visibleCategories = categories.filter((category) => category.products.length > 0);
@@ -22,7 +24,7 @@ export default async function ProductsPage() {
           <div>
             <h1 className="text-4xl font-bold text-white md:text-6xl lg:text-7xl">Our Products</h1>
             <p className="mx-auto mt-4 max-w-2xl text-sm text-white/85 md:text-lg">
-              Browse all product categories and discover complete collections.
+              To View the Full Extent of Our Products Please Check Out The Downloadable Catalogue
             </p>
           </div>
         </div>

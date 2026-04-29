@@ -5,7 +5,6 @@ import Products from '@/components/Products';
 import Certifications from '@/components/Certifications';
 import BrandsClients from '@/components/BrandsClients';
 import Sustainability from '@/components/Sustainability';
-import News from '@/components/News';
 import CallToAction from '@/components/CallToAction';
 import {
   getHomepage,
@@ -13,17 +12,17 @@ import {
   getHomeProducts,
   getCertifications,
   getClients,
-  getNews,
 } from '@/lib/data';
 
+export const revalidate = 3600;
+
 export default async function Home() {
-  const [homepage, sisterConcerns, products, certifications, clients, news] = await Promise.all([
+  const [homepage, sisterConcerns, products, certifications, clients] = await Promise.all([
     getHomepage(),
     getSisterConcerns(),
     getHomeProducts(),
     getCertifications(),
     getClients(),
-    getNews(),
   ]);
 
   return (
@@ -35,7 +34,6 @@ export default async function Home() {
       <Certifications items={certifications} />
       <BrandsClients items={clients} />
       <Sustainability items={homepage?.sustainability} />
-      <News items={news} />
       <CallToAction />
     </>
   );

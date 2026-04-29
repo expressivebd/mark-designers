@@ -12,7 +12,6 @@ const navItems = [
   { label: 'Products', href: '/admin/product-management' },
   { label: 'Certifications', href: '/admin/certification-management' },
   { label: 'Clients', href: '/admin/client-management' },
-  { label: 'News', href: '/admin/news-management' },
   { label: 'Contacts', href: '/admin/contact' },
 ];
 

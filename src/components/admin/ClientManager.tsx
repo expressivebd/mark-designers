@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import Image from 'next/image';
 import UploadField from './UploadField';
 import ConfirmDialog from './ConfirmDialog';
@@ -9,18 +9,6 @@ type ClientItem = {
   id: string;
   name: string;
   logoUrl: string;
-};
-
-type ClientStats = {
-  totalClients: number;
-  countriesServed: string;
-  yearsServed: string;
-  satisfactionPercentage: string;
-};
-
-type ClientGetResponse = {
-  items: ClientItem[];
-  stats: ClientStats;
 };
 
 type FormState = {
@@ -33,24 +21,14 @@ const emptyForm: FormState = {
   logoUrl: '',
 };
 
-const emptyStats: ClientStats = {
-  totalClients: 0,
-  countriesServed: '',
-  yearsServed: '',
-  satisfactionPercentage: '',
-};
-
 export default function ClientManager() {
   const [items, setItems] = useState<ClientItem[]>([]);
   const [form, setForm] = useState<FormState>(emptyForm);
   const [editId, setEditId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<FormState>(emptyForm);
-  const [stats, setStats] = useState<ClientStats>(emptyStats);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
-
-  const totalClients = useMemo(() => items.length, [items.length]);
 
   const loadItems = useCallback(async () => {
     setIsLoading(true);
@@ -62,14 +40,8 @@ export default function ClientManager() {
         throw new Error('Failed to load clients');
       }
 
-      const data = (await response.json()) as ClientGetResponse;
+      const data = await response.json();
       setItems(data.items || []);
-      setStats({
-        totalClients: Number(data?.stats?.totalClients || 0),
-        countriesServed: String(data?.stats?.countriesServed || ''),
-        yearsServed: String(data?.stats?.yearsServed || ''),
-        satisfactionPercentage: String(data?.stats?.satisfactionPercentage || ''),
-      });
     } catch {
       setError('Failed to load clients.');
     } finally {
@@ -139,41 +111,10 @@ export default function ClientManager() {
     loadItems();
   };
 
-  const requestDelete = (id: string) => {
-    setDeleteId(id);
-  };
-
-  const cancelDelete = () => {
-    setDeleteId(null);
-  };
-
   const confirmDelete = async () => {
-    if (!deleteId) {
-      return;
-    }
-
+    if (!deleteId) return;
     await handleDelete(deleteId);
     setDeleteId(null);
-  };
-
-  const handleSaveStats = async () => {
-    const response = await fetch('/api/admin/clients', {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        action: 'updateStats',
-        countriesServed: stats.countriesServed,
-        yearsServed: stats.yearsServed,
-        satisfactionPercentage: stats.satisfactionPercentage,
-      }),
-    });
-
-    if (!response.ok) {
-      setError('Failed to save client stats.');
-      return;
-    }
-
-    loadItems();
   };
 
   return (
@@ -206,55 +147,6 @@ export default function ClientManager() {
           className="mt-4 rounded-sm bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary-dark"
         >
           Create Client
-        </button>
-
-        <div className="mt-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
-          <div className="space-y-1">
-            <label className="block text-xs font-medium text-primary">Total Number Of Client</label>
-            <input
-              type="text"
-              value={String(totalClients)}
-              readOnly
-              className="w-full rounded-sm border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-600"
-            />
-          </div>
-          <div className="space-y-1">
-            <label className="block text-xs font-medium text-primary">Total Countries Served</label>
-            <input
-              type="text"
-              value={stats.countriesServed}
-              onChange={(event) => setStats((prev) => ({ ...prev, countriesServed: event.target.value }))}
-              className="w-full rounded-sm border border-slate-200 px-3 py-2 text-sm"
-            />
-          </div>
-          <div className="space-y-1">
-            <label className="block text-xs font-medium text-primary">Years Served</label>
-            <input
-              type="text"
-              value={stats.yearsServed}
-              onChange={(event) => setStats((prev) => ({ ...prev, yearsServed: event.target.value }))}
-              className="w-full rounded-sm border border-slate-200 px-3 py-2 text-sm"
-            />
-          </div>
-          <div className="space-y-1">
-            <label className="block text-xs font-medium text-primary">Client Satisfaction Percentage</label>
-            <input
-              type="text"
-              value={stats.satisfactionPercentage}
-              onChange={(event) =>
-                setStats((prev) => ({ ...prev, satisfactionPercentage: event.target.value }))
-              }
-              className="w-full rounded-sm border border-slate-200 px-3 py-2 text-sm"
-            />
-          </div>
-        </div>
-
-        <button
-          type="button"
-          onClick={handleSaveStats}
-          className="mt-4 rounded-sm border border-primary px-4 py-2 text-sm font-medium text-primary hover:bg-primary hover:text-white"
-        >
-          Save Client Stats
         </button>
       </div>
 
@@ -321,7 +213,7 @@ export default function ClientManager() {
                     </button>
                     <button
                       type="button"
-                      onClick={() => requestDelete(item.id)}
+                      onClick={() => setDeleteId(item.id)}
                       className="flex-1 rounded-sm border border-red-200 px-3 py-2 text-xs font-medium text-red-600"
                     >
                       Delete
@@ -343,7 +235,7 @@ export default function ClientManager() {
         confirmLabel="Confirm"
         cancelLabel="Cancel"
         onConfirm={confirmDelete}
-        onCancel={cancelDelete}
+        onCancel={() => setDeleteId(null)}
       />
     </div>
   );
