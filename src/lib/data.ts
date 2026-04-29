@@ -102,11 +102,22 @@ export type ProductItem = {
   addToHome: boolean;
 };
 
+export type CategoryDetailItem = {
+  photoUrl: string;
+  text: string;
+};
+
+export type CategoryDetails = {
+  thumbnailUrl: string;
+  details: CategoryDetailItem[];
+};
+
 export type ProductCategory = {
   id: string;
   name: string;
   slug: string;
   products: ProductItem[];
+  categoryDetails?: CategoryDetails | null;
 };
 
 export type CertificationItem = {
@@ -283,18 +294,41 @@ function makeSlug(value: string) {
 
 export async function getProductCategories() {
   const db = await getDb();
-  const categoryDocs = await db
-    .collection<{ _id: ObjectId; name: string }>('productCategories')
-    .find({})
-    .sort({ order: 1, createdAt: 1 })
-    .toArray();
 
-  const categories = categoryDocs.map((doc) => ({
-    id: doc._id.toString(),
-    name: String(doc.name || ''),
-    slug: makeSlug(String(doc.name || 'category')),
-    products: [] as ProductItem[],
-  }));
+  const [categoryDocs, categoryDetailsDocs] = await Promise.all([
+    db
+      .collection<{ _id: ObjectId; name: string }>('productCategories')
+      .find({})
+      .sort({ order: 1, createdAt: 1 })
+      .toArray(),
+    db
+      .collection<{ _id: ObjectId; categoryId?: string; thumbnailUrl?: string; details?: CategoryDetailItem[] }>('categoryDetails')
+      .find({})
+      .toArray(),
+  ]);
+
+  const detailsMap = new Map(
+    categoryDetailsDocs.map((doc) => [
+      String(doc.categoryId || ''),
+      {
+        thumbnailUrl: String(doc.thumbnailUrl || ''),
+        details: Array.isArray(doc.details)
+          ? doc.details.map((d) => ({ photoUrl: String(d?.photoUrl || ''), text: String(d?.text || '') }))
+          : [],
+      } as CategoryDetails,
+    ])
+  );
+
+  const categories = categoryDocs.map((doc) => {
+    const id = doc._id.toString();
+    return {
+      id,
+      name: String(doc.name || ''),
+      slug: makeSlug(String(doc.name || 'category')),
+      products: [] as ProductItem[],
+      categoryDetails: detailsMap.get(id) ?? null,
+    };
+  });
 
   const categoryMap = new Map(categories.map((category) => [category.id, category]));
 
@@ -349,6 +383,7 @@ export async function getProductCategories() {
         imageUrl: String(product.imageUrl || ''),
         addToHome: Boolean(product.addToHome),
       })),
+      categoryDetails: null,
     });
   }
 

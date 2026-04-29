@@ -20,6 +20,13 @@ type ProductDoc = {
   createdAt?: Date;
 };
 
+type CategoryDetailsDoc = {
+  _id: ObjectId;
+  categoryId?: string;
+  thumbnailUrl?: string;
+  details?: Array<{ photoUrl?: string; text?: string }>;
+};
+
 function slugify(value: string) {
   return value
     .toLowerCase()
@@ -29,20 +36,43 @@ function slugify(value: string) {
     .replace(/-+/g, '-');
 }
 
-function toCategoriesWithProducts(categories: CategoryDoc[], products: ProductDoc[]) {
-  const mappedCategories = categories.map((category) => ({
-    id: category._id.toString(),
-    name: String(category.name || ''),
-    slug: slugify(String(category.name || 'category')),
-    products: [] as Array<{
-      id: string;
-      categoryId: string;
-      name: string;
-      description: string;
-      imageUrl: string;
-      addToHome: boolean;
-    }>,
-  }));
+function toCategoriesWithProducts(
+  categories: CategoryDoc[],
+  products: ProductDoc[],
+  categoryDetails: CategoryDetailsDoc[]
+) {
+  const detailsMap = new Map(
+    categoryDetails.map((d) => [
+      String(d.categoryId || ''),
+      {
+        thumbnailUrl: String(d.thumbnailUrl || ''),
+        details: Array.isArray(d.details)
+          ? d.details.map((item) => ({
+              photoUrl: String(item?.photoUrl || ''),
+              text: String(item?.text || ''),
+            }))
+          : [],
+      },
+    ])
+  );
+
+  const mappedCategories = categories.map((category) => {
+    const id = category._id.toString();
+    return {
+      id,
+      name: String(category.name || ''),
+      slug: slugify(String(category.name || 'category')),
+      products: [] as Array<{
+        id: string;
+        categoryId: string;
+        name: string;
+        description: string;
+        imageUrl: string;
+        addToHome: boolean;
+      }>,
+      categoryDetails: detailsMap.get(id) ?? null,
+    };
+  });
 
   const categoryMap = new Map(mappedCategories.map((category) => [category.id, category]));
 
@@ -81,6 +111,7 @@ function toCategoriesWithProducts(categories: CategoryDoc[], products: ProductDo
         imageUrl: String(product.imageUrl || ''),
         addToHome: Boolean(product.addToHome),
       })),
+      categoryDetails: null,
     });
   }
 
@@ -101,12 +132,13 @@ export async function GET() {
   }
 
   const db = await getDb();
-  const [categories, products] = await Promise.all([
+  const [categories, products, categoryDetails] = await Promise.all([
     db.collection<CategoryDoc>('productCategories').find({}).sort({ order: 1, createdAt: 1 }).toArray(),
     db.collection<ProductDoc>('products').find({}).sort({ order: 1, createdAt: 1 }).toArray(),
+    db.collection<CategoryDetailsDoc>('categoryDetails').find({}).toArray(),
   ]);
 
-  return NextResponse.json(toCategoriesWithProducts(categories, products));
+  return NextResponse.json(toCategoriesWithProducts(categories, products, categoryDetails));
 }
 
 export async function POST(request: Request) {
@@ -160,6 +192,33 @@ export async function POST(request: Request) {
 
     revalidatePath('/', 'layout');
     return NextResponse.json({ id: result.insertedId.toString() });
+  }
+
+  if (payload?.action === 'saveCategoryDetails') {
+    const categoryId = parseObjectId(payload?.categoryId);
+    if (!categoryId) {
+      return NextResponse.json({ error: 'Valid category ID is required' }, { status: 400 });
+    }
+
+    const thumbnailUrl = String(payload?.thumbnailUrl || '').trim();
+    const details = Array.isArray(payload?.details)
+      ? payload.details.map((item: { photoUrl?: string; text?: string }) => ({
+          photoUrl: String(item?.photoUrl || '').trim(),
+          text: String(item?.text || '').trim(),
+        }))
+      : [];
+
+    await db.collection('categoryDetails').updateOne(
+      { categoryId: categoryId.toString() },
+      {
+        $set: { categoryId: categoryId.toString(), thumbnailUrl, details, updatedAt: new Date() },
+        $setOnInsert: { createdAt: new Date() },
+      },
+      { upsert: true }
+    );
+
+    revalidatePath('/', 'layout');
+    return NextResponse.json({ ok: true });
   }
 
   return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
@@ -241,8 +300,20 @@ export async function DELETE(request: Request) {
     await Promise.all([
       db.collection('productCategories').deleteOne({ _id: categoryId }),
       db.collection('products').deleteMany({ categoryId: categoryId.toString() }),
+      db.collection('categoryDetails').deleteOne({ categoryId: categoryId.toString() }),
     ]);
 
+    revalidatePath('/', 'layout');
+    return NextResponse.json({ ok: true });
+  }
+
+  if (payload?.action === 'deleteCategoryDetails') {
+    const categoryId = parseObjectId(payload?.categoryId);
+    if (!categoryId) {
+      return NextResponse.json({ error: 'Valid category ID is required' }, { status: 400 });
+    }
+
+    await db.collection('categoryDetails').deleteOne({ categoryId: categoryId.toString() });
     revalidatePath('/', 'layout');
     return NextResponse.json({ ok: true });
   }

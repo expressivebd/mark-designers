@@ -15,11 +15,22 @@ type AdminProduct = {
   addToHome: boolean;
 };
 
+type DetailItem = {
+  photoUrl: string;
+  text: string;
+};
+
+type CategoryDetails = {
+  thumbnailUrl: string;
+  details: DetailItem[];
+};
+
 type AdminCategory = {
   id: string;
   name: string;
   slug: string;
   products: AdminProduct[];
+  categoryDetails?: CategoryDetails | null;
 };
 
 type ProductForm = {
@@ -30,12 +41,20 @@ type ProductForm = {
   imageUrl: string;
 };
 
+type DetailsForm = {
+  categoryId: string;
+  thumbnailUrl: string;
+  details: DetailItem[];
+};
+
 const emptyForm: ProductForm = {
   categoryId: '',
   name: '',
   description: '',
   imageUrl: '',
 };
+
+const MAX_DETAILS = 4;
 
 export default function ProductManagementAdmin() {
   const [categories, setCategories] = useState<AdminCategory[]>([]);
@@ -49,8 +68,14 @@ export default function ProductManagementAdmin() {
   const [pendingDelete, setPendingDelete] = useState<
     | { kind: 'product'; id: string }
     | { kind: 'category'; id: string }
+    | { kind: 'categoryDetails'; categoryId: string }
     | null
   >(null);
+
+  const [detailsForm, setDetailsForm] = useState<DetailsForm | null>(null);
+  const [isSavingDetails, setIsSavingDetails] = useState(false);
+  const [editingDetailIndex, setEditingDetailIndex] = useState<number | null>(null);
+  const [changingThumbnailFor, setChangingThumbnailFor] = useState<string | null>(null);
 
   const editingProduct = useMemo(() => Boolean(productForm.id), [productForm.id]);
 
@@ -95,6 +120,124 @@ export default function ProductManagementAdmin() {
   const closeModal = () => {
     setIsModalOpen(false);
     setProductForm(emptyForm);
+  };
+
+  const openDetailsForm = (category: AdminCategory) => {
+    setDetailsForm({
+      categoryId: category.id,
+      thumbnailUrl: category.categoryDetails?.thumbnailUrl ?? '',
+      details: category.categoryDetails?.details ? [...category.categoryDetails.details] : [],
+    });
+    setEditingDetailIndex(null);
+  };
+
+  const closeDetailsForm = () => {
+    setDetailsForm(null);
+    setEditingDetailIndex(null);
+  };
+
+  const addDetailItem = () => {
+    if (!detailsForm || detailsForm.details.length >= MAX_DETAILS) return;
+    const newIndex = detailsForm.details.length;
+    setDetailsForm((prev) =>
+      prev ? { ...prev, details: [...prev.details, { photoUrl: '', text: '' }] } : prev
+    );
+    setEditingDetailIndex(newIndex);
+  };
+
+  const removeDetailItem = (index: number) => {
+    setDetailsForm((prev) =>
+      prev ? { ...prev, details: prev.details.filter((_, i) => i !== index) } : prev
+    );
+    setEditingDetailIndex((prev) => {
+      if (prev === null) return null;
+      if (prev === index) return null;
+      if (prev > index) return prev - 1;
+      return prev;
+    });
+  };
+
+  const updateDetailItem = (index: number, field: keyof DetailItem, value: string) => {
+    setDetailsForm((prev) => {
+      if (!prev) return prev;
+      const updated = [...prev.details];
+      updated[index] = { ...updated[index], [field]: value };
+      return { ...prev, details: updated };
+    });
+  };
+
+  const handleSaveDetails = async () => {
+    if (!detailsForm) return;
+
+    if (!detailsForm.thumbnailUrl.trim()) {
+      setError('Thumbnail photo is required.');
+      return;
+    }
+
+    setIsSavingDetails(true);
+    setError('');
+
+    const response = await fetch('/api/admin/products', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'saveCategoryDetails',
+        categoryId: detailsForm.categoryId,
+        thumbnailUrl: detailsForm.thumbnailUrl,
+        details: detailsForm.details,
+      }),
+    });
+
+    setIsSavingDetails(false);
+
+    if (!response.ok) {
+      setError('Failed to save category details.');
+      return;
+    }
+
+    setDetailsForm(null);
+    setEditingDetailIndex(null);
+    loadData();
+  };
+
+  const handleDeleteCategoryDetails = async (categoryId: string) => {
+    const response = await fetch('/api/admin/products', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'deleteCategoryDetails', categoryId }),
+    });
+
+    if (!response.ok) {
+      setError('Failed to delete category details.');
+      return;
+    }
+
+    loadData();
+  };
+
+  const handleChangeThumbnail = async (
+    categoryId: string,
+    thumbnailUrl: string,
+    existingDetails: DetailItem[]
+  ) => {
+    const response = await fetch('/api/admin/products', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'saveCategoryDetails',
+        categoryId,
+        thumbnailUrl,
+        details: existingDetails,
+      }),
+    });
+
+    if (!response.ok) {
+      setError('Failed to update thumbnail.');
+      return;
+    }
+
+    setChangingThumbnailFor(null);
+    loadData();
   };
 
   const handleCreateCategory = async () => {
@@ -212,27 +355,21 @@ export default function ProductManagementAdmin() {
     loadData();
   };
 
-  const requestDeleteProduct = (productId: string) => {
-    setPendingDelete({ kind: 'product', id: productId });
-  };
-
-  const requestDeleteCategory = (categoryId: string) => {
-    setPendingDelete({ kind: 'category', id: categoryId });
-  };
-
-  const cancelDelete = () => {
-    setPendingDelete(null);
-  };
+  const requestDeleteProduct = (productId: string) => setPendingDelete({ kind: 'product', id: productId });
+  const requestDeleteCategory = (categoryId: string) => setPendingDelete({ kind: 'category', id: categoryId });
+  const requestDeleteCategoryDetails = (categoryId: string) =>
+    setPendingDelete({ kind: 'categoryDetails', categoryId });
+  const cancelDelete = () => setPendingDelete(null);
 
   const confirmDelete = async () => {
-    if (!pendingDelete) {
-      return;
-    }
+    if (!pendingDelete) return;
 
     if (pendingDelete.kind === 'category') {
       await handleDeleteCategory(pendingDelete.id);
-    } else {
+    } else if (pendingDelete.kind === 'product') {
       await handleDeleteProduct(pendingDelete.id);
+    } else if (pendingDelete.kind === 'categoryDetails') {
+      await handleDeleteCategoryDetails(pendingDelete.categoryId);
     }
 
     setPendingDelete(null);
@@ -273,79 +410,352 @@ export default function ProductManagementAdmin() {
       )}
 
       <div className="space-y-6">
-        {categories.map((category) => (
-          <div key={category.id} className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-4">
-              <div>
-                <h2 className="text-xl font-playfair font-semibold text-primary">{category.name}</h2>
-                <p className="text-xs text-slate-500">{category.products.length} product(s)</p>
-              </div>
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => openCreateProduct(category.id)}
-                  disabled={category.id === 'uncategorized'}
-                  className="rounded-sm bg-primary px-3 py-2 text-xs font-medium text-white hover:bg-primary-dark disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  Add New Product
-                </button>
-                <button
-                  type="button"
-                  onClick={() => requestDeleteCategory(category.id)}
-                  disabled={category.id === 'uncategorized'}
-                  className="rounded-sm border border-red-200 px-3 py-2 text-xs font-medium text-red-600 hover:border-red-400 disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  Delete Category
-                </button>
-              </div>
-            </div>
+        {categories.map((category) => {
+          const isEditingDetails = detailsForm?.categoryId === category.id;
+          const hasDetails = Boolean(category.categoryDetails?.thumbnailUrl);
 
-            <div className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4">
-              {category.products.map((product) => (
-                <div key={product.id} className="rounded-md border border-slate-200 p-2">
-                  <div className="relative mb-2 h-28 overflow-hidden rounded-sm bg-slate-100">
-                    <Image
-                      src={product.imageUrl}
-                      alt={product.name}
-                      fill
-                      className="object-cover"
-                      sizes="(max-width: 768px) 50vw, 25vw"
-                    />
-                  </div>
-                  <h3 className="text-sm font-semibold text-primary">{product.name}</h3>
-                  <p className="mt-1 text-xs text-slate-600">{product.description}</p>
-
-                  <button
-                    type="button"
-                    onClick={() => handleToggleHome(product)}
-                    className={`mt-2 w-full rounded-sm px-2 py-1.5 text-[11px] font-medium text-white ${
-                      product.addToHome ? 'bg-red-500 hover:bg-red-600' : 'bg-emerald-600 hover:bg-emerald-700'
-                    }`}
-                  >
-                    {product.addToHome ? 'Delete From Home' : 'Add To Home'}
-                  </button>
-
-                  <div className="mt-2 flex items-center gap-2">
+          return (
+            <div key={category.id} className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+              {/* Category header */}
+              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-4">
+                <div>
+                  <h2 className="text-xl font-playfair font-semibold text-primary">{category.name}</h2>
+                  <p className="text-xs text-slate-500">{category.products.length} product(s)</p>
+                </div>
+                <div className="flex flex-wrap items-center gap-2">
+                  {!isEditingDetails && (
                     <button
                       type="button"
-                      onClick={() => openEditProduct(product)}
-                      className="flex-1 rounded-sm border border-slate-300 px-2 py-1.5 text-[11px] font-medium text-primary hover:border-primary"
+                      onClick={() => openDetailsForm(category)}
+                      disabled={category.id === 'uncategorized'}
+                      className="rounded-sm border border-slate-300 px-3 py-2 text-xs font-medium text-primary hover:border-primary disabled:cursor-not-allowed disabled:opacity-50"
                     >
-                      Edit
+                      {hasDetails ? 'Edit Category Details' : 'Add Category Details'}
+                    </button>
+                  )}
+                  {hasDetails && !isEditingDetails && (
+                    <button
+                      type="button"
+                      onClick={() => requestDeleteCategoryDetails(category.id)}
+                      className="rounded-sm border border-red-200 px-3 py-2 text-xs font-medium text-red-600 hover:border-red-400"
+                    >
+                      Delete Details
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => openCreateProduct(category.id)}
+                    disabled={category.id === 'uncategorized'}
+                    className="rounded-sm bg-primary px-3 py-2 text-xs font-medium text-white hover:bg-primary-dark disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    Add New Product
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => requestDeleteCategory(category.id)}
+                    disabled={category.id === 'uncategorized'}
+                    className="rounded-sm border border-red-200 px-3 py-2 text-xs font-medium text-red-600 hover:border-red-400 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    Delete Category
+                  </button>
+                </div>
+              </div>
+
+              {/* Category Details inline form */}
+              {isEditingDetails && detailsForm && (
+                <div className="mt-4 rounded-md border border-slate-200 bg-slate-50 p-4">
+                  <h3 className="mb-4 text-sm font-semibold text-primary">Category Details</h3>
+
+                  {/* Thumbnail upload */}
+                  <UploadField
+                    label="Thumbnail Photo"
+                    value={detailsForm.thumbnailUrl}
+                    folder="category-details"
+                    onChange={(url) =>
+                      setDetailsForm((prev) => (prev ? { ...prev, thumbnailUrl: url } : prev))
+                    }
+                  />
+                  {detailsForm.thumbnailUrl && (
+                    <div className="relative mt-2 h-16 w-24 overflow-hidden rounded-sm border border-slate-200 bg-slate-100">
+                      <Image
+                        src={detailsForm.thumbnailUrl}
+                        alt="Thumbnail preview"
+                        fill
+                        className="object-cover"
+                        sizes="96px"
+                      />
+                    </div>
+                  )}
+
+                  {/* Detail items as cards */}
+                  {detailsForm.details.length > 0 && (
+                    <div className="mt-4 space-y-2">
+                      {detailsForm.details.map((item, index) =>
+                        editingDetailIndex === index ? (
+                          /* Expanded edit form */
+                          <div
+                            key={index}
+                            className="rounded-md border border-primary/30 bg-white p-3"
+                          >
+                            <div className="mb-3 flex items-center justify-between">
+                              <span className="text-xs font-semibold text-primary">
+                                Detail {index + 1}
+                              </span>
+                              <button
+                                type="button"
+                                onClick={() => setEditingDetailIndex(null)}
+                                className="rounded-sm bg-primary px-2 py-1 text-xs font-medium text-white hover:bg-primary-dark"
+                              >
+                                Done
+                              </button>
+                            </div>
+                            <UploadField
+                              label="Photo"
+                              value={item.photoUrl}
+                              folder="category-details"
+                              onChange={(url) => updateDetailItem(index, 'photoUrl', url)}
+                            />
+                            {item.photoUrl && (
+                              <div className="relative mt-1 h-14 w-20 overflow-hidden rounded-sm border border-slate-200 bg-slate-100">
+                                <Image
+                                  src={item.photoUrl}
+                                  alt={`Detail ${index + 1}`}
+                                  fill
+                                  className="object-cover"
+                                  sizes="80px"
+                                />
+                              </div>
+                            )}
+                            <div className="mt-2 space-y-1">
+                              <label className="block text-sm font-medium text-primary">
+                                Details Text
+                              </label>
+                              <textarea
+                                value={item.text}
+                                onChange={(event) =>
+                                  updateDetailItem(index, 'text', event.target.value)
+                                }
+                                rows={3}
+                                placeholder="Enter detail text..."
+                                className="w-full rounded-sm border border-slate-200 px-3 py-2 text-sm"
+                              />
+                            </div>
+                          </div>
+                        ) : (
+                          /* Compact card view */
+                          <div
+                            key={index}
+                            className="flex items-center gap-3 rounded-md border border-slate-200 bg-white p-2"
+                          >
+                            <div className="relative h-12 w-12 flex-shrink-0 overflow-hidden rounded-sm bg-slate-100">
+                              {item.photoUrl ? (
+                                <Image
+                                  src={item.photoUrl}
+                                  alt=""
+                                  fill
+                                  className="object-cover"
+                                  sizes="48px"
+                                />
+                              ) : (
+                                <div className="flex h-full w-full items-center justify-center">
+                                  <span className="text-[10px] text-slate-400">No photo</span>
+                                </div>
+                              )}
+                            </div>
+                            <p className="line-clamp-2 flex-1 text-xs text-slate-600">
+                              {item.text || '(no text)'}
+                            </p>
+                            <div className="flex gap-1">
+                              <button
+                                type="button"
+                                onClick={() => setEditingDetailIndex(index)}
+                                className="rounded-sm border border-slate-200 px-2 py-1 text-[11px] font-medium text-primary hover:border-primary"
+                              >
+                                Edit
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => removeDetailItem(index)}
+                                className="rounded-sm border border-red-100 px-2 py-1 text-[11px] font-medium text-red-500 hover:border-red-300"
+                              >
+                                Remove
+                              </button>
+                            </div>
+                          </div>
+                        )
+                      )}
+                    </div>
+                  )}
+
+                  {detailsForm.details.length < MAX_DETAILS ? (
+                    <button
+                      type="button"
+                      onClick={addDetailItem}
+                      className="mt-3 w-full rounded-sm border border-dashed border-slate-300 px-4 py-2 text-xs font-medium text-slate-600 hover:border-primary hover:text-primary"
+                    >
+                      + Add Details
+                    </button>
+                  ) : (
+                    <p className="mt-3 text-center text-xs text-slate-500">
+                      Maximum {MAX_DETAILS} detail items reached.
+                    </p>
+                  )}
+
+                  <div className="mt-4 flex justify-end gap-2">
+                    <button
+                      type="button"
+                      onClick={closeDetailsForm}
+                      className="rounded-sm border border-slate-300 px-4 py-2 text-sm font-medium text-primary"
+                    >
+                      Cancel
                     </button>
                     <button
                       type="button"
-                      onClick={() => requestDeleteProduct(product.id)}
-                      className="flex-1 rounded-sm border border-red-200 px-2 py-1.5 text-[11px] font-medium text-red-600 hover:border-red-400"
+                      onClick={handleSaveDetails}
+                      disabled={isSavingDetails}
+                      className="rounded-sm bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary-dark disabled:opacity-60"
                     >
-                      Delete
+                      {isSavingDetails ? 'Saving...' : 'Save Details'}
                     </button>
                   </div>
                 </div>
-              ))}
+              )}
+
+              {/* Details preview (read-only, when not editing) */}
+              {!isEditingDetails && hasDetails && category.categoryDetails && (
+                <div className="mt-4">
+                  <p className="mb-2 text-xs font-medium uppercase tracking-wide text-slate-500">
+                    Category Details Preview
+                  </p>
+
+                  <div className="w-48 rounded-md border border-slate-200 p-2">
+                    {/* Thumbnail — same h-28 as product cards */}
+                    <div className="relative mb-2 h-28 overflow-hidden rounded-sm bg-slate-100">
+                      <Image
+                        src={category.categoryDetails.thumbnailUrl}
+                        alt="Category thumbnail"
+                        fill
+                        className="object-cover"
+                        sizes="192px"
+                      />
+                    </div>
+
+                    {/* Change thumbnail button */}
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setChangingThumbnailFor(
+                          changingThumbnailFor === category.id ? null : category.id
+                        )
+                      }
+                      className="mb-1 w-full rounded-sm border border-slate-200 px-2 py-1 text-[11px] font-medium text-primary hover:border-primary"
+                    >
+                      {changingThumbnailFor === category.id ? 'Cancel' : 'Change Thumbnail'}
+                    </button>
+
+                    {/* Detail rows: photo + text in one row each */}
+                    {category.categoryDetails.details.map((item, i) => (
+                      <div
+                        key={i}
+                        className="flex items-center gap-1.5 border-t border-slate-100 py-1"
+                      >
+                        <div className="relative h-7 w-7 flex-shrink-0 overflow-hidden rounded-sm bg-slate-100">
+                          {item.photoUrl && (
+                            <Image
+                              src={item.photoUrl}
+                              alt=""
+                              fill
+                              className="object-cover"
+                              sizes="28px"
+                            />
+                          )}
+                        </div>
+                        <p className="line-clamp-1 flex-1 text-[10px] leading-tight text-slate-600">
+                          {item.text || '—'}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Inline thumbnail upload */}
+                  {changingThumbnailFor === category.id && (
+                    <div className="mt-2 max-w-xs rounded-md border border-slate-200 bg-white p-3">
+                      <UploadField
+                        label="Upload New Thumbnail"
+                        value=""
+                        folder="category-details"
+                        onChange={(url) =>
+                          handleChangeThumbnail(
+                            category.id,
+                            url,
+                            category.categoryDetails!.details
+                          )
+                        }
+                      />
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Separator between details and products */}
+              <hr className="my-4 border-slate-200" />
+
+              {/* Products */}
+              {category.products.length === 0 ? (
+                <p className="text-sm text-slate-500">
+                  No products yet. Click Add New Product to add one.
+                </p>
+              ) : (
+                <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4">
+                  {category.products.map((product) => (
+                    <div key={product.id} className="rounded-md border border-slate-200 p-2">
+                      <div className="relative mb-2 h-28 overflow-hidden rounded-sm bg-slate-100">
+                        <Image
+                          src={product.imageUrl}
+                          alt={product.name}
+                          fill
+                          className="object-cover"
+                          sizes="(max-width: 768px) 50vw, 25vw"
+                        />
+                      </div>
+                      <h3 className="text-sm font-semibold text-primary">{product.name}</h3>
+                      <p className="mt-1 text-xs text-slate-600">{product.description}</p>
+
+                      <button
+                        type="button"
+                        onClick={() => handleToggleHome(product)}
+                        className={`mt-2 w-full rounded-sm px-2 py-1.5 text-[11px] font-medium text-white ${
+                          product.addToHome
+                            ? 'bg-red-500 hover:bg-red-600'
+                            : 'bg-emerald-600 hover:bg-emerald-700'
+                        }`}
+                      >
+                        {product.addToHome ? 'Delete From Home' : 'Add To Home'}
+                      </button>
+
+                      <div className="mt-2 flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => openEditProduct(product)}
+                          className="flex-1 rounded-sm border border-slate-300 px-2 py-1.5 text-[11px] font-medium text-primary hover:border-primary"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => requestDeleteProduct(product.id)}
+                          className="flex-1 rounded-sm border border-red-200 px-2 py-1.5 text-[11px] font-medium text-red-600 hover:border-red-400"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {error && <p className="text-sm text-red-600">{error}</p>}
@@ -458,10 +868,18 @@ export default function ProductManagementAdmin() {
 
       <ConfirmDialog
         isOpen={Boolean(pendingDelete)}
-        title={pendingDelete?.kind === 'category' ? 'Delete Category' : 'Delete Product'}
+        title={
+          pendingDelete?.kind === 'category'
+            ? 'Delete Category'
+            : pendingDelete?.kind === 'categoryDetails'
+            ? 'Delete Category Details'
+            : 'Delete Product'
+        }
         message={
           pendingDelete?.kind === 'category'
             ? 'Are you sure you want to delete this category and all products inside it?'
+            : pendingDelete?.kind === 'categoryDetails'
+            ? 'Are you sure you want to delete the category details? This cannot be undone.'
             : 'Are you sure you want to delete this product?'
         }
         confirmLabel="Confirm"
