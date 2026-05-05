@@ -79,18 +79,6 @@ export default function ContactPageClient({ addresses }: Props) {
                                                 title={`Map - ${office.title}`}
                                             />
                                         </div>
-                                        {/* Get Direction — desktop only (below map, full width to match map) */}
-                                        <a
-                                            href={office.directionUrl}
-                                            target="_blank"
-                                            rel="noreferrer"
-                                            className="hidden lg:flex items-center justify-center gap-2 rounded-full bg-primary px-5 py-3 text-sm font-semibold text-white transition-all duration-300 hover:bg-primary-dark hover:scale-105 w-full"
-                                        >
-                                            Get Direction
-                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                                            </svg>
-                                        </a>
                                     </div>
 
                                     {/* Info */}
@@ -158,18 +146,6 @@ export default function ContactPageClient({ addresses }: Props) {
                                                 </div>
                                             </div>
 
-                                            {/* Get Direction — mobile only (end of card) */}
-                                            <a
-                                                href={office.directionUrl}
-                                                target="_blank"
-                                                rel="noreferrer"
-                                                className="lg:hidden inline-flex items-center gap-2 rounded-full bg-primary px-5 py-3 text-sm font-semibold text-white transition-all duration-300 hover:bg-primary-dark hover:scale-105"
-                                            >
-                                                Get Direction
-                                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                                                </svg>
-                                            </a>
                                         </div>
                                     </div>
                                 </motion.div>
