@@ -159,67 +159,35 @@ export type ContactAddressItem = {
   directionUrl: string;
 };
 
-function isGoogleMapsUrl(value: string): boolean {
-  try {
-    const url = new URL(value);
-    return (
-      url.hostname === 'maps.app.goo.gl' ||
-      url.hostname === 'goo.gl' ||
-      url.hostname === 'www.google.com' && url.pathname.startsWith('/maps') ||
-      url.hostname === 'google.com' && url.pathname.startsWith('/maps')
-    );
-  } catch {
-    return false;
-  }
-}
-
-function buildEmbedUrlFromMapsUrl(mapsUrl: string): string {
-  try {
-    const url = new URL(mapsUrl);
-    // Already an embed URL — return as-is
-    if (url.searchParams.get('output') === 'embed') return mapsUrl;
-    // short link like maps.app.goo.gl — append output=embed as query param
-    if (url.hostname === 'maps.app.goo.gl' || url.hostname === 'goo.gl') {
-      return `${mapsUrl}${mapsUrl.includes('?') ? '&' : '?'}output=embed`;
-    }
-    // Full google.com/maps URL
-    if ((url.hostname === 'www.google.com' || url.hostname === 'google.com') && url.pathname.startsWith('/maps')) {
-      url.searchParams.set('output', 'embed');
-      return url.toString();
-    }
-  } catch {
-    // fall through
-  }
-  return '';
-}
 
 function normalizeContactAddress(item: Record<string, unknown>): ContactAddressItem {
   const mapLocation = String(item.mapLocation || '').trim();
   const fullAddress = String(item.fullAddress || '').trim();
 
   // ── Embed URL ────────────────────────────────────────────────────────────────
-  // Always geocode from plain-text fullAddress. This is 100% reliable and works
-  // for any address. We NEVER trust stored URLs because old records contain the
-  // short link URL-encoded as the `q` parameter (completely broken).
+  // Use whatever embed URL was resolved and stored by the API on save (coordinate-based
+  // for short links, or address-based fallback). Only recompute from address for records
+  // that predate this field.
+  const storedEmbedUrl = String(item.mapEmbedUrl || '').trim();
   const addrForEmbed = fullAddress || mapLocation;
-  const mapEmbedUrl =
-    addrForEmbed && !isGoogleMapsUrl(addrForEmbed)
-      ? `https://maps.google.com/maps?q=${encodeURIComponent(addrForEmbed)}&output=embed`
-      : addrForEmbed
-      ? `https://maps.google.com/maps?q=${encodeURIComponent(addrForEmbed)}&output=embed`
-      : '';
+  const mapEmbedUrl = storedEmbedUrl
+    ? storedEmbedUrl
+    : addrForEmbed
+    ? `https://maps.google.com/maps?q=${encodeURIComponent(addrForEmbed)}&output=embed`
+    : '';
 
   // ── Direction URL ────────────────────────────────────────────────────────────
-  // If mapLocation is a real Google Maps share link, use it directly — browsers
-  // follow the redirect correctly when the link is opened in a new tab.
-  // Otherwise derive from fullAddress.
-  let directionUrl = '';
-  if (mapLocation && isGoogleMapsUrl(mapLocation)) {
-    directionUrl = mapLocation;
-  } else if (fullAddress) {
-    directionUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(fullAddress)}`;
-  } else if (mapLocation) {
-    directionUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(mapLocation)}`;
+  // Never use embed URLs for directions — they open the embed API error page.
+  // Use the stored value if it's a real directions/share URL; otherwise rebuild.
+  const storedDirectionUrl = String(item.directionUrl || '').trim();
+  const isEmbedUrl = (u: string) => u.startsWith('https://www.google.com/maps/embed');
+  let directionUrl = isEmbedUrl(storedDirectionUrl) ? '' : storedDirectionUrl;
+  if (!directionUrl) {
+    if (fullAddress) {
+      directionUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(fullAddress)}`;
+    } else if (mapLocation && !isEmbedUrl(mapLocation)) {
+      directionUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(mapLocation)}`;
+    }
   }
 
   return {

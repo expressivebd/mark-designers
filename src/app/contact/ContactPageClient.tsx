@@ -65,18 +65,32 @@ export default function ContactPageClient({ addresses }: Props) {
                                     className={`flex flex-col ${index % 2 === 0 ? 'lg:flex-row' : 'lg:flex-row-reverse'
                                         } gap-8 lg:gap-12`}
                                 >
-                                    {/* Map */}
-                                    <div className="w-full lg:w-1/2 h-[300px] md:h-[400px] rounded-2xl overflow-hidden shadow-lg border border-gray-100">
-                                        <iframe
-                                            src={office.mapEmbedUrl}
-                                            width="100%"
-                                            height="100%"
-                                            style={{ border: 0 }}
-                                            allowFullScreen
-                                            loading="lazy"
-                                            referrerPolicy="no-referrer-when-downgrade"
-                                            title={`Map - ${office.title}`}
-                                        />
+                                    {/* Map + Get Direction (desktop) */}
+                                    <div className="w-full lg:w-1/2 flex flex-col gap-4">
+                                        <div className="h-[300px] md:h-[400px] rounded-2xl overflow-hidden shadow-lg border border-gray-100">
+                                            <iframe
+                                                src={office.mapEmbedUrl}
+                                                width="100%"
+                                                height="100%"
+                                                style={{ border: 0 }}
+                                                allowFullScreen
+                                                loading="lazy"
+                                                referrerPolicy="no-referrer-when-downgrade"
+                                                title={`Map - ${office.title}`}
+                                            />
+                                        </div>
+                                        {/* Get Direction — desktop only (below map, full width to match map) */}
+                                        <a
+                                            href={office.directionUrl}
+                                            target="_blank"
+                                            rel="noreferrer"
+                                            className="hidden lg:flex items-center justify-center gap-2 rounded-full bg-primary px-5 py-3 text-sm font-semibold text-white transition-all duration-300 hover:bg-primary-dark hover:scale-105 w-full"
+                                        >
+                                            Get Direction
+                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                                            </svg>
+                                        </a>
                                     </div>
 
                                     {/* Info */}
@@ -144,11 +158,12 @@ export default function ContactPageClient({ addresses }: Props) {
                                                 </div>
                                             </div>
 
+                                            {/* Get Direction — mobile only (end of card) */}
                                             <a
                                                 href={office.directionUrl}
                                                 target="_blank"
                                                 rel="noreferrer"
-                                                className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-3 text-sm font-semibold text-white transition-all duration-300 hover:bg-primary-dark hover:scale-105"
+                                                className="lg:hidden inline-flex items-center gap-2 rounded-full bg-primary px-5 py-3 text-sm font-semibold text-white transition-all duration-300 hover:bg-primary-dark hover:scale-105"
                                             >
                                                 Get Direction
                                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

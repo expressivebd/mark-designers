@@ -65,6 +65,12 @@ function buildDirectionUrl(location: string) {
   return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(query)}`;
 }
 
+// If the user pastes the full <iframe> HTML, pull out just the src value.
+function extractMapSrc(input: string): string {
+  const srcMatch = input.match(/\bsrc="([^"]+)"/);
+  return srcMatch ? srcMatch[1] : input;
+}
+
 
 export default function ContactAddressManager() {
   const [items, setItems] = useState<ContactAddressItem[]>([]);
@@ -104,32 +110,51 @@ export default function ContactAddressManager() {
     loadItems();
   }, [loadItems]);
 
-  // Resolve Google Maps URLs for live preview whenever the location field changes
+  // Update map preview whenever Map Location changes.
   useEffect(() => {
-    const addr = form.fullAddress.trim() || form.mapLocation.trim();
     const mapsUrl = form.mapLocation.trim();
 
-    // Embed: use plain-text address for reliable geocoding
-    const addrForEmbed = form.fullAddress.trim() || (!isGoogleMapsUrl(mapsUrl) ? mapsUrl : '');
-    const embedUrl = addrForEmbed
-      ? buildEmbedUrl(addrForEmbed)
-      : '';
-
-    // Direction: share link (or address fallback)
-    const directionUrl = mapsUrl && isGoogleMapsUrl(mapsUrl)
-      ? mapsUrl
-      : addr
-      ? buildDirectionUrl(addr)
-      : '';
-
-    if (embedUrl || directionUrl) {
-      setPreviewEmbed({ embedUrl, directionUrl });
-    } else {
+    if (!mapsUrl) {
       setPreviewEmbed(null);
+      setIsResolvingPreview(false);
+      return;
     }
-    setIsResolvingPreview(false);
+
+    // Direct embed src URL — use as-is (most accurate: exact pin, clean single-location view)
+    if (mapsUrl.startsWith('https://www.google.com/maps/embed')) {
+      const directionUrl = buildDirectionUrl(form.fullAddress.trim());
+      setPreviewEmbed({ embedUrl: mapsUrl, directionUrl });
+      setIsResolvingPreview(false);
+      return;
+    }
+
+    const directionUrl = isGoogleMapsUrl(mapsUrl) ? mapsUrl : buildDirectionUrl(mapsUrl);
+
+    if (isGoogleMapsUrl(mapsUrl)) {
+      // Share link — resolve server-side to get embed URL
+      setIsResolvingPreview(true);
+      let cancelled = false;
+
+      fetch(`/api/admin/resolve-maps?url=${encodeURIComponent(mapsUrl)}`)
+        .then((r) => r.json())
+        .then((data: { embedUrl?: string }) => {
+          if (!cancelled) setPreviewEmbed({ embedUrl: data.embedUrl ?? '', directionUrl });
+        })
+        .catch(() => {
+          if (!cancelled) setPreviewEmbed({ embedUrl: '', directionUrl });
+        })
+        .finally(() => {
+          if (!cancelled) setIsResolvingPreview(false);
+        });
+
+      return () => { cancelled = true; };
+    } else {
+      // Plain address text
+      setPreviewEmbed({ embedUrl: buildEmbedUrl(mapsUrl), directionUrl });
+      setIsResolvingPreview(false);
+    }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [form.fullAddress, form.mapLocation]);
+  }, [form.mapLocation, form.fullAddress]);
 
   const openCreateForm = () => {
     setEditId(null);
@@ -459,15 +484,19 @@ export default function ContactAddressManager() {
                 <label className="block text-sm font-medium text-primary">Map Location</label>
                 <textarea
                   value={form.mapLocation}
-                  onChange={(event) => setForm((prev) => ({ ...prev, mapLocation: event.target.value }))}
-                  className="w-full rounded-sm border border-slate-200 px-3 py-2 text-sm"
-                  rows={3}
-                  placeholder="Paste a Google Maps share link (e.g. https://maps.app.goo.gl/...) or enter a place name / address"
+                  onChange={(event) =>
+                    setForm((prev) => ({ ...prev, mapLocation: extractMapSrc(event.target.value) }))
+                  }
+                  className="w-full rounded-sm border border-slate-200 px-3 py-2 text-sm font-mono"
+                  rows={4}
+                  placeholder="Paste the full <iframe> embed code OR just the src URL from Google Maps → Share → Embed a map"
                 />
-                <p className="text-xs text-gray-500">You can paste a Google Maps short link (maps.app.goo.gl), a full Google Maps URL, or just type a place name or address.</p>
+                <p className="text-xs text-gray-500">
+                  <strong>How to get the embed code:</strong> Google Maps → find your location → Share → Embed a map → copy everything inside the box (the full <code className="bg-slate-100 px-1 rounded">&lt;iframe ...&gt;</code> tag). The <code className="bg-slate-100 px-1 rounded">src</code> URL will be extracted automatically. This shows a precise single pin.
+                </p>
               </div>
 
-              {formMapLocation && (
+              {form.mapLocation.trim() && (
                 <div className="md:col-span-2 rounded-lg border border-slate-200 p-4 space-y-3">
                   <p className="text-sm font-semibold text-primary">Map Preview</p>
                   <div className="relative h-64 w-full overflow-hidden rounded-md bg-slate-100">
