@@ -104,10 +104,11 @@ const Header = () => {
                   />
                 </svg>
                 <a
-                  href="tel:+880123456789"
+                  href="tel:+880248034501"
                   className="font-light hover:text-accent transition-colors"
                 >
-                  +880 123 456 789
+                  +88 02 48034501
+
                 </a>
               </div>
             </div>
@@ -186,7 +187,7 @@ const Header = () => {
 
               {/* Download Catalog Button */}
               <a
-                href="/catalogue.pdf"
+                href="/mark-catalogue.pdf"
                 download
                 className="btn-primary text-xs md:text-base px-3 py-2 md:px-8 md:py-3 rounded-md inline-flex items-center gap-2"
               >
