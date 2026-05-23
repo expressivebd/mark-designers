@@ -187,7 +187,7 @@ const Header = () => {
 
               {/* Download Catalog Button */}
               <a
-                href="/catalogue.pdf"
+                href="/Mark_fashion_book.pdf"
                 download
                 className="btn-primary text-xs md:text-base px-3 py-2 md:px-8 md:py-3 rounded-md inline-flex items-center gap-2"
               >
