@@ -13,10 +13,9 @@ const Footer = () => {
   ];
 
   const productLinks = [
-    { label: 'T-Shirts', href: '/products/t-shirts' },
-    { label: 'Polo Shirts', href: '/products/polo-shirts' },
-    { label: 'Hoodies', href: '/products/hoodies' },
-    { label: 'Jackets', href: '/products/jackets' },
+    { label: 'Mens', href: '/products' },
+    { label: 'Womens', href: '/products' },
+    { label: 'Kids', href: '/products' },
   ];
 
   const resourceLinks = [

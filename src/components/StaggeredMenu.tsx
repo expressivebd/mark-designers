@@ -21,7 +21,7 @@ const menuItems: MenuItem[] = [
   { label: 'Home', href: '/', number: '01' },
   { label: 'About', href: '/about', number: '02' },
   {
-    label: 'Sister Concerns',
+    label: 'Our Facilities',
     href: '/sister-concerns',
     number: '03',
     children: [],
