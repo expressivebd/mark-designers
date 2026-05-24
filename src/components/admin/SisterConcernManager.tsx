@@ -16,12 +16,12 @@ type SisterConcernForm = {
   personnel: string;
   totalMachines: string;
   factoryPhotos: string[];
+  link: string;
 };
 
 type SisterConcernItem = SisterConcernForm & {
   id: string;
   slug: string;
-  link: string;
   yearsInOperation: number;
 };
 
@@ -48,6 +48,7 @@ function emptyForm(): SisterConcernForm {
     personnel: '',
     totalMachines: '',
     factoryPhotos: [],
+    link: '',
   };
 }
 
@@ -374,6 +375,18 @@ export default function SisterConcernManager() {
           </div>
         </div>
 
+        <div className="space-y-2">
+          <label className="block text-sm font-medium text-primary">Custom Link (optional)</label>
+          <input
+            type="text"
+            value={values.link}
+            placeholder="e.g. /sister-concerns/my-facility or https://example.com"
+            onChange={(event) => setValues((prev) => ({ ...prev, link: event.target.value }))}
+            className="w-full rounded-sm border border-slate-200 px-3 py-2 text-sm"
+          />
+          <p className="text-xs text-slate-500">If left empty, the Auto Link above will be used.</p>
+        </div>
+
         {renderFactoryPhotoEditor(
           values.factoryPhotos,
           (next) => setValues((prev) => ({ ...prev, factoryPhotos: next })),
@@ -505,6 +518,7 @@ export default function SisterConcernManager() {
                           personnel: item.personnel || '',
                           totalMachines: item.totalMachines || '',
                           factoryPhotos: item.factoryPhotos || [],
+                          link: item.link || '',
                         });
                       }}
                       className="rounded-sm border border-slate-200 px-4 py-2 text-sm font-medium text-primary hover:border-primary"

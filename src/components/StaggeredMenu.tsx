@@ -167,7 +167,7 @@ const StaggeredMenu = ({ isOpen, onClose }: StaggeredMenuProps) => {
                       exit="closed"
                       variants={itemVariants}
                     >
-                      {item.label === 'Sister Concerns' ? (
+                      {item.label === 'Our Facilities' ? (
                         /* Accordion Item */
                         <div>
                           <div className="group flex items-center gap-6 py-3 text-white">
@@ -234,7 +234,7 @@ const StaggeredMenu = ({ isOpen, onClose }: StaggeredMenuProps) => {
                             )}
                           </AnimatePresence>
                         </div>
-                      ) : item.children ? (
+                      ) : item.children && item.children.length > 0 ? (
                         <div>
                           <button
                             onClick={() =>
@@ -313,7 +313,7 @@ const StaggeredMenu = ({ isOpen, onClose }: StaggeredMenuProps) => {
               </nav>
 
               {/* Social Links */}
-              <motion.div
+              {/* <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.6, duration: 0.5 }}
@@ -335,7 +335,7 @@ const StaggeredMenu = ({ isOpen, onClose }: StaggeredMenuProps) => {
                     </a>
                   ))}
                 </div>
-              </motion.div>
+              </motion.div> */}
             </div>
           </motion.div>
         </>

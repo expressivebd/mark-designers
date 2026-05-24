@@ -85,7 +85,7 @@ const Header = () => {
                   href="mailto:info@markdesigners.com"
                   className="font-light hover:text-accent transition-colors"
                 >
-                  info@markdesigners.com
+                  info@markdesignersltd.com
                 </a>
               </div>
 
