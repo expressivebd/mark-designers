@@ -111,7 +111,7 @@ const Hero = ({ data }: { data?: HeroData | null }) => {
               href="#about"
               className="btn-accent px-10 py-4 text-lg hover:scale-105 transition-transform"
             >
-              Discover Our Story
+              Our Story
             </a>
             <a
               href="#products"

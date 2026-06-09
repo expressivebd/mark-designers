@@ -283,6 +283,15 @@ export default function AboutPageClient({ about, certifications: certData }: Pro
                             </div>
                         ))}
                     </motion.div>
+
+                    <motion.p
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={machineryInView ? { opacity: 1, y: 0 } : {}}
+                        transition={{ duration: 0.6, delay: 0.4 }}
+                        className="text-center text-gray-600 mt-10 max-w-2xl mx-auto italic"
+                    >
+                        Meticulous inspections are done after each process to maintain our commitment to manufacturing high quality garments.
+                    </motion.p>
                 </div>
             </section>
 
@@ -298,9 +307,9 @@ export default function AboutPageClient({ about, certifications: certData }: Pro
                     >
                         <h2 className="heading-secondary">Our Expertise</h2>
                         <div className="w-16 h-1 bg-accent mx-auto mt-4" />
-                        <p className="text-gray-600 mt-6 max-w-2xl mx-auto">
+                        {/* <p className="text-gray-600 mt-6 max-w-2xl mx-auto">
                             End-to-end garment manufacturing capabilities under one roof
-                        </p>
+                        </p> */}
                     </motion.div>
 
                     <div className="space-y-0">
