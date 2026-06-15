@@ -77,7 +77,7 @@ const Footer = () => {
               <p className="text-accent text-sm tracking-widest">SINCE 1995</p>
             </Link>
             <p className="text-white/80 leading-relaxed mb-6">
-              Leading garment manufacturer serving clients across Europe, North America, and Asia with quality, commitment, and innovation.
+              Leading garment manufacturer serving clients across Europe, North America, and Asia with commitment to quality and innovation.
             </p>
             <div className="flex gap-4">
               {socialLinks.map((social) => (

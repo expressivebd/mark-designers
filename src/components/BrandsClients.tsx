@@ -32,7 +32,7 @@ const BrandsClients = ({ items }: { items?: ClientItem[] }) => {
           transition={{ duration: 0.6 }}
           className="text-center mb-16"
         >
-          <h2 className="heading-primary">Our Clients & Partners</h2>
+          <h2 className="heading-primary">Clients and Partners</h2>
           <div className="w-24 h-1 bg-accent mx-auto mt-4" />
           <p className="text-gray-600 mt-6 max-w-2xl mx-auto">
             Trusted by leading global brands across multiple continents

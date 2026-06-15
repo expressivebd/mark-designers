@@ -1,4 +1,4 @@
-import Image from 'next/image';
+﻿import Image from 'next/image';
 import SEOHead from '@/components/SEOHead';
 import { getClients } from '@/lib/data';
 
@@ -30,20 +30,25 @@ export default async function ClientsPage() {
 
       <section className="section-padding bg-white">
         <div className="container-custom">
-          <div className="mb-10 text-center">
+          {/* <div className="mb-10 text-center">
             <h2 className="heading-secondary mb-2">Clients</h2>
             <div className="mx-auto h-1 w-16 bg-accent" />
-          </div>
+          </div> */}
 
           <div className="grid grid-cols-2 gap-4 md:gap-6 lg:grid-cols-4">
             {clients.map((client) => (
               <article
                 key={client.id}
-                title={client.name}
-                className="card cursor-pointer overflow-hidden border border-slate-100 p-4"
+                className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm"
               >
-                <div className="relative mx-auto h-24 w-full max-w-[220px] bg-slate-50">
-                  <Image src={client.logoUrl} alt={client.name} fill className="object-contain" sizes="220px" />
+                <div className="relative aspect-[3/2] w-full bg-white">
+                  <Image
+                    src={client.logoUrl}
+                    alt={client.name}
+                    fill
+                    className="object-contain"
+                    sizes="(max-width: 640px) 50vw, 25vw"
+                  />
                 </div>
               </article>
             ))}

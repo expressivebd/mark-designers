@@ -32,7 +32,7 @@ export default async function SisterConcernDetailPage({ params }: { params: Prom
         heroImage: concern.thumbnailUrl || '/p1.jpg',
         description: descriptionParagraphs.length ? descriptionParagraphs : [concern.description],
         stats: [
-          { value: concern.capacity || '-', label: 'Daily Capacity' },
+          { value: concern.capacity || '-', label: 'Manufacturing Capacity' },
           { value: concern.personnel || '-', label: 'Personnel' },
           {
             value: concern.yearsInOperation ? `${concern.yearsInOperation}+` : '-',

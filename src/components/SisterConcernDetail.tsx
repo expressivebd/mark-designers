@@ -115,8 +115,8 @@ export default function SisterConcernDetail({ data }: { data: ConcernData }) {
                         transition={{ duration: 0.6 }}
                         className="text-center mb-12"
                     >
-                        <h2 className="heading-secondary">Machinery & Facilities</h2>
-                        <div className="w-16 h-1 bg-accent mx-auto mt-4" />
+                        <h2 className="heading-primary">Machinery and Facilities</h2>
+                        <div className="w-32 h-1 bg-accent mx-auto mt-4" />
                     </motion.div>
 
                     <motion.div
@@ -164,7 +164,7 @@ export default function SisterConcernDetail({ data }: { data: ConcernData }) {
                         <svg className="w-5 h-5 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16l-4-4m0 0l4-4m-4 4h18" />
                         </svg>
-                        <span>All Sister Concerns</span>
+                        <span>All Facilities</span>
                     </Link>
                 </div>
             </section>

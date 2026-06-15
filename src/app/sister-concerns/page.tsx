@@ -65,7 +65,7 @@ export default async function SisterConcernsPage() {
                                             <p className="text-primary text-lg font-semibold">{concern.location || '-'}</p>
                                         </div>
                                         <div className="bg-slate-50 rounded-xl p-4">
-                                            <p className="text-accent text-sm font-semibold tracking-wider mb-1">CAPACITY</p>
+                                            <p className="text-accent text-sm font-semibold tracking-wider mb-1">MANUFACTURING CAPACITY</p>
                                             <p className="text-primary text-xl font-playfair font-bold">{concern.capacity || '-'}</p>
                                         </div>
                                         <div className="bg-slate-50 rounded-xl p-4">
@@ -75,7 +75,7 @@ export default async function SisterConcernsPage() {
                                     </div>
 
                                     <Link href={concern.link} className="btn-primary inline-flex items-center gap-2 group">
-                                        <span>Know More</span>
+                                        <span>More</span>
                                         <svg
                                             className="w-5 h-5 group-hover:translate-x-1 transition-transform"
                                             fill="none"

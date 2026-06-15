@@ -32,7 +32,7 @@ const Certifications = ({ items }: { items?: CertificationItem[] }) => {
           transition={{ duration: 0.6 }}
           className="text-center mb-16"
         >
-          <h2 className="heading-primary">Certifications & Compliance</h2>
+          <h2 className="heading-primary">Certifications and Compliance</h2>
           <div className="w-24 h-1 bg-accent mx-auto mt-4" />
           <p className="text-gray-600 mt-6 max-w-2xl mx-auto">
             Our commitment to quality and compliance is recognized globally
