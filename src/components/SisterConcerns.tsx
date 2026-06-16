@@ -80,7 +80,7 @@ const SisterConcerns = ({ items }: { items?: SisterConcernItem[] }) => {
                       href={concern.link || '/sister-concerns'}
                       className="inline-flex items-center gap-2 text-primary font-medium hover:text-accent transition-colors duration-300 group/link mt-6"
                     >
-                      <span>Know More</span>
+                      <span>More</span>
                       <svg
                         className="w-5 h-5 group-hover/link:translate-x-1 transition-transform"
                         fill="none"

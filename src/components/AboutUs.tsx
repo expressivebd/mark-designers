@@ -99,7 +99,7 @@ const AboutUs = ({ text, stats }: { text?: string; stats?: StatItem[] }) => {
             href="/about"
             className="btn-primary inline-flex items-center gap-2 group"
           >
-            <span>More About Us</span>
+            <span>More</span>
             <svg
               className="w-5 h-5 group-hover:translate-x-1 transition-transform"
               fill="none"
