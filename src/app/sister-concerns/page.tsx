@@ -11,7 +11,7 @@ export default async function SisterConcernsPage() {
         <>
             <section className="relative h-[50vh] md:h-[60vh] flex items-center justify-center overflow-hidden">
                 <Image
-                    src={concerns[0]?.thumbnailUrl || '/p2.jpg'}
+                    src="/p1.jpg"
                     alt="Sister Concerns"
                     fill
                     className="object-cover"
