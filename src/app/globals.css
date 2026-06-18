@@ -45,6 +45,10 @@
     @apply px-8 py-3 bg-primary text-white rounded-sm font-medium hover:bg-primary-dark transition-all duration-300 hover:shadow-lg;
   }
 
+  .btn-secondary {
+    @apply px-8 py-3 bg-white text-primary border border-primary rounded-sm font-medium hover:bg-primary hover:text-white transition-all duration-300 hover:shadow-lg;
+  }
+
   .btn-accent {
     @apply px-8 py-3 bg-accent text-white rounded-sm font-medium hover:bg-accent-dark transition-all duration-300 hover:shadow-lg;
   }
