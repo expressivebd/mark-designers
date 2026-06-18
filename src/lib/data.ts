@@ -92,9 +92,18 @@ function normalizeSisterConcern(item: Record<string, unknown>): SisterConcernIte
   };
 }
 
+export type ProductGender = {
+  id: string;
+  name: string;
+  slug: string;
+  imageUrl: string;
+  href: string;
+};
+
 export type ProductItem = {
   id: string;
   categoryId: string;
+  genderId: string;
   categoryName?: string;
   name: string;
   description: string;
@@ -246,6 +255,27 @@ export async function getSisterConcernBySlug(slug: string) {
   return normalizeSisterConcern(mapId(doc) as Record<string, unknown>);
 }
 
+export async function getProductGenders(): Promise<ProductGender[]> {
+  const db = await getDb();
+  const docs = await db
+    .collection<Record<string, unknown> & { _id: ObjectId }>('productGenders')
+    .find({})
+    .sort({ createdAt: 1 })
+    .toArray();
+
+  return docs.map((doc) => {
+    const name = String(doc.name || '');
+    const slug = String(doc.slug || '') || makeSlug(name);
+    return {
+      id: doc._id.toString(),
+      name,
+      slug,
+      imageUrl: String(doc.imageUrl || ''),
+      href: `/products/${slug}`,
+    };
+  });
+}
+
 export async function getProducts() {
   const categories = await getProductCategories();
   return categories.flatMap((category) => category.products);
@@ -304,6 +334,7 @@ export async function getProductCategories() {
     .collection<{
       _id: ObjectId;
       categoryId?: string;
+      genderId?: string;
       name?: string;
       description?: string;
       imageUrl?: string;
@@ -324,6 +355,7 @@ export async function getProductCategories() {
     category.products.push({
       id: product._id.toString(),
       categoryId,
+      genderId: String(product.genderId || ''),
       categoryName: category.name,
       name: String(product.name || ''),
       description: String(product.description || ''),
@@ -345,6 +377,7 @@ export async function getProductCategories() {
       products: uncategorized.map((product) => ({
         id: product._id.toString(),
         categoryId: 'uncategorized',
+        genderId: String(product.genderId || ''),
         categoryName: 'Uncategorized',
         name: String(product.name || ''),
         description: String(product.description || ''),

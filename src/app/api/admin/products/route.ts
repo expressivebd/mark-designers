@@ -13,6 +13,7 @@ type CategoryDoc = {
 type ProductDoc = {
   _id: ObjectId;
   categoryId?: string;
+  genderId?: string;
   name?: string;
   description?: string;
   imageUrl?: string;
@@ -65,6 +66,7 @@ function toCategoriesWithProducts(
       products: [] as Array<{
         id: string;
         categoryId: string;
+        genderId: string;
         name: string;
         description: string;
         imageUrl: string;
@@ -86,6 +88,7 @@ function toCategoriesWithProducts(
     category.products.push({
       id: product._id.toString(),
       categoryId,
+      genderId: String(product.genderId || ''),
       name: String(product.name || ''),
       description: String(product.description || ''),
       imageUrl: String(product.imageUrl || ''),
@@ -106,6 +109,7 @@ function toCategoriesWithProducts(
       products: uncategorized.map((product) => ({
         id: product._id.toString(),
         categoryId: 'uncategorized',
+        genderId: String(product.genderId || ''),
         name: String(product.name || ''),
         description: String(product.description || ''),
         imageUrl: String(product.imageUrl || ''),
@@ -172,6 +176,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Valid category ID is required' }, { status: 400 });
     }
 
+    const genderId = String(payload?.genderId || '').trim();
     const name = String(payload?.name || '').trim();
     const description = String(payload?.description || '').trim();
     const imageUrl = String(payload?.imageUrl || '').trim();
@@ -182,6 +187,7 @@ export async function POST(request: Request) {
 
     const result = await db.collection('products').insertOne({
       categoryId: categoryId.toString(),
+      genderId,
       name,
       description,
       imageUrl,
@@ -257,6 +263,7 @@ export async function PUT(request: Request) {
   const description = String(payload?.description || '').trim();
   const imageUrl = String(payload?.imageUrl || '').trim();
   const categoryId = parseObjectId(payload?.categoryId);
+  const genderId = String(payload?.genderId || '').trim();
 
   if (!name || !description || !imageUrl || !categoryId) {
     return NextResponse.json(
@@ -270,6 +277,7 @@ export async function PUT(request: Request) {
     {
       $set: {
         categoryId: categoryId.toString(),
+        genderId,
         name,
         description,
         imageUrl,

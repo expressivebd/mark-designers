@@ -17,6 +17,12 @@ type SisterConcernNavItem = {
   href: string;
 };
 
+type GenderNavItem = {
+  id: string;
+  name: string;
+  href: string;
+};
+
 const menuItems: MenuItem[] = [
   { label: 'Home', href: '/', number: '01' },
   { label: 'About', href: '/about', number: '02' },
@@ -26,7 +32,7 @@ const menuItems: MenuItem[] = [
     number: '03',
     children: [],
   },
-  { label: 'Products', href: '/products', number: '04' },
+  { label: 'Products', href: '/products', number: '04', children: [] },
   { label: 'Certifications', href: '/certifications', number: '05' },
   { label: 'Clients', href: '/clients', number: '06' },
   { label: 'Contact', href: '/contact', number: '07' },
@@ -46,6 +52,7 @@ interface StaggeredMenuProps {
 const StaggeredMenu = ({ isOpen, onClose }: StaggeredMenuProps) => {
   const [expandedItem, setExpandedItem] = useState<string | null>(null);
   const [sisterConcerns, setSisterConcerns] = useState<SisterConcernNavItem[]>([]);
+  const [productGenders, setProductGenders] = useState<GenderNavItem[]>([]);
 
   useEffect(() => {
     if (isOpen) {
@@ -76,6 +83,23 @@ const StaggeredMenu = ({ isOpen, onClose }: StaggeredMenuProps) => {
 
     if (isOpen) {
       loadSisterConcerns();
+    }
+  }, [isOpen]);
+
+  useEffect(() => {
+    const loadGenders = async () => {
+      try {
+        const response = await fetch('/api/genders');
+        if (!response.ok) return;
+        const data = (await response.json()) as GenderNavItem[];
+        setProductGenders(data || []);
+      } catch {
+        setProductGenders([]);
+      }
+    };
+
+    if (isOpen) {
+      loadGenders();
     }
   }, [isOpen]);
 
@@ -160,14 +184,14 @@ const StaggeredMenu = ({ isOpen, onClose }: StaggeredMenuProps) => {
                 <ul className="space-y-2">
                   {menuItems.map((item, index) => (
                     <motion.li
-                      key={item.href}
+                      key={item.number}
                       custom={index}
                       initial="closed"
                       animate="open"
                       exit="closed"
                       variants={itemVariants}
                     >
-                      {item.label === 'Our Facilities' ? (
+                      {(item.label === 'Our Facilities' || item.label === 'Products') ? (
                         /* Accordion Item */
                         <div>
                           <div className="group flex items-center gap-6 py-3 text-white">
@@ -218,8 +242,8 @@ const StaggeredMenu = ({ isOpen, onClose }: StaggeredMenuProps) => {
                                 className="overflow-hidden"
                               >
                                 <ul className="pl-14 md:pl-16 space-y-1 pb-2">
-                                  {sisterConcerns.map((child) => (
-                                    <li key={child.href}>
+                                  {(item.label === 'Products' ? productGenders : sisterConcerns).map((child) => (
+                                    <li key={child.id}>
                                       <Link
                                         href={child.href}
                                         onClick={onClose}
@@ -236,35 +260,42 @@ const StaggeredMenu = ({ isOpen, onClose }: StaggeredMenuProps) => {
                         </div>
                       ) : item.children && item.children.length > 0 ? (
                         <div>
-                          <button
-                            onClick={() =>
-                              setExpandedItem(
-                                expandedItem === item.label ? null : item.label
-                              )
-                            }
-                            className="group flex items-center gap-6 py-3 text-white hover:text-accent transition-colors duration-300 w-full text-left"
-                          >
+                          <div className="group flex items-center gap-6 py-3 text-white">
                             <span className="text-sm font-light text-accent/60 min-w-[2rem]">
                               {item.number}
                             </span>
-                            <span className="text-3xl md:text-4xl lg:text-5xl font-playfair font-semibold">
-                              {item.label}
-                            </span>
-                            <svg
-                              className={`w-6 h-6 md:w-8 md:h-8 ml-auto transition-transform duration-300 ${expandedItem === item.label ? 'rotate-180' : ''
-                                }`}
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
+                            <Link
+                              href={item.href}
+                              onClick={onClose}
+                              className="text-3xl md:text-4xl lg:text-5xl font-playfair font-semibold hover:text-accent transition-colors duration-300"
                             >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M19 9l-7 7-7-7"
-                              />
-                            </svg>
-                          </button>
+                              {item.label}
+                            </Link>
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setExpandedItem(expandedItem === item.label ? null : item.label)
+                              }
+                              aria-label={`Toggle ${item.label} submenu`}
+                              className="ml-auto hover:text-accent transition-colors duration-300"
+                            >
+                              <svg
+                                className={`h-6 w-6 md:h-8 md:w-8 transition-transform duration-300 ${
+                                  expandedItem === item.label ? 'rotate-180' : ''
+                                }`}
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M19 9l-7 7-7-7"
+                                />
+                              </svg>
+                            </button>
+                          </div>
 
                           <AnimatePresence>
                             {expandedItem === item.label && (
@@ -277,7 +308,7 @@ const StaggeredMenu = ({ isOpen, onClose }: StaggeredMenuProps) => {
                               >
                                 <ul className="pl-14 md:pl-16 space-y-1 pb-2">
                                   {item.children.map((child) => (
-                                    <li key={child.href}>
+                                    <li key={child.label}>
                                       <Link
                                         href={child.href}
                                         onClick={onClose}

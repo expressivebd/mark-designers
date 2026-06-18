@@ -1,29 +1,26 @@
 import Image from 'next/image';
+import Link from 'next/link';
 import SEOHead from '@/components/SEOHead';
-import { getProductCategories } from '@/lib/data';
+import { getProductCategories, getProductGenders } from '@/lib/data';
 import ProductGrid from '@/components/ProductGrid';
 
 export const revalidate = 3600;
 
-function getDetailsPanelClass(count: number): string {
-  if (count === 1) return 'flex flex-col';
-  if (count === 2) return 'grid grid-cols-2 gap-3 md:flex md:flex-col md:gap-3';
-  // 3-4: mobile 2-per-row, desktop column-first 2×2
-  return 'grid grid-cols-2 gap-3 md:grid-rows-2 md:grid-flow-col';
-}
-
 export default async function ProductsPage() {
-  const categories = await getProductCategories();
-  const visibleCategories = categories.filter((category) => category.products.length > 0);
+  const [genderCards, allCategories] = await Promise.all([
+    getProductGenders(),
+    getProductCategories(),
+  ]);
 
   return (
     <>
       <SEOHead
         title="Products"
-        description="Explore our category-based product collections from Mark Designers."
-        keywords="products, categories, garments, mark designers"
+        description="Explore our garment collections for Ladies, Men's, and Kids' — Outerwear, Tops, and Bottoms."
+        keywords="products, garments, outerwear, tops, bottoms, ladies, mens, kids, mark designers"
       />
 
+      {/* Hero */}
       <section className="relative h-[45vh] md:h-[56vh] overflow-hidden">
         <Image src="/p3.jpg" alt="Our Products" fill priority className="object-cover" />
         <div className="absolute inset-0 bg-black/55" />
@@ -37,109 +34,177 @@ export default async function ProductsPage() {
         </div>
       </section>
 
-      <section className="sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur">
-        <div className="container-custom py-4">
-          <div className="hide-scrollbar flex items-center gap-2 overflow-x-auto">
-            {visibleCategories.map((category) => (
-              <a
-                key={category.id}
-                href={`#${category.slug}`}
-                className="whitespace-nowrap rounded-full border border-slate-300 px-4 py-2 text-sm font-medium text-primary transition hover:border-primary hover:bg-primary hover:text-white"
-              >
-                {category.name}
-              </a>
-            ))}
+      {/* Gender Category Cards */}
+      {genderCards.length > 0 && (
+        <section className="section-padding bg-white">
+          <div className="container-custom">
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
+              {genderCards.map((card) => (
+                <Link
+                  key={card.href}
+                  href={card.href}
+                  className="group relative block overflow-hidden rounded-2xl aspect-square"
+                >
+                  <Image
+                    src={card.imageUrl || '/p3.jpg'}
+                    alt={card.name}
+                    fill
+                    className="object-cover transition-transform duration-500 group-hover:scale-105"
+                    sizes="(max-width: 640px) 100vw, 33vw"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+                  <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
+                    <h2 className="text-3xl font-playfair font-bold">{card.name}</h2>
+                    <span className="mt-2 inline-flex items-center gap-2 text-sm text-white/70 group-hover:text-accent transition-colors duration-300">
+                      Explore Collection
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                      </svg>
+                    </span>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Sticky category nav */}
+      {allCategories.length > 0 && (
+        <div className="sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur">
+          <div className="container-custom py-4">
+            <div className="hide-scrollbar flex items-center gap-2 overflow-x-auto">
+              {allCategories.map((cat) => (
+                <a
+                  key={cat.slug}
+                  href={`#${cat.slug}`}
+                  className="whitespace-nowrap rounded-full border border-slate-300 px-4 py-2 text-sm font-medium text-primary transition hover:border-primary hover:bg-primary hover:text-white"
+                >
+                  {cat.name}
+                </a>
+              ))}
+            </div>
           </div>
         </div>
-      </section>
+      )}
 
-      {visibleCategories.map((category, index) => {
-        const details = category.categoryDetails?.details ?? [];
-        const hasThumbnail = Boolean(category.categoryDetails?.thumbnailUrl);
-        const hasDetailItems = details.length > 0;
+      {/* Category Sections */}
+      {allCategories.map((genCat, genIndex) => {
+        const details = genCat.categoryDetails?.details ?? [];
+        const thumbnailUrl = genCat.categoryDetails?.thumbnailUrl ?? '';
+        const allProducts = genCat.products ?? [];
 
         return (
           <section
-            key={category.id}
-            id={category.slug}
-            className={`section-padding ${index % 2 === 0 ? 'bg-white' : 'bg-slate-50'}`}
+            key={genCat.slug}
+            id={genCat.slug}
+            className={`section-padding ${genIndex % 2 === 0 ? 'bg-white' : 'bg-slate-50'}`}
           >
             <div className="container-custom">
-              <div className="mb-10 text-center">
-                <h2 className="heading-secondary mb-2">{category.name}</h2>
+
+              {/* Section heading */}
+              <div className="mb-12 text-center">
+                <h2 className="heading-secondary mb-2">{genCat.name}</h2>
                 <div className="mx-auto h-1 w-16 bg-accent" />
               </div>
 
-              {hasThumbnail ? (
-                <>
-                  {/* Thumbnail (1:1 on mobile, height-matched on desktop) left + details right */}
-                  <div
-                    className={`mb-10 flex flex-col gap-4 ${
-                      hasDetailItems ? 'md:flex-row md:items-stretch md:gap-6' : ''
-                    }`}
-                  >
-                    {/* Thumbnail — 1:1 on mobile, stretches to details height on desktop */}
-                    <div
-                      className={`relative overflow-hidden rounded-xl border border-slate-200 ${
-                        hasDetailItems
-                          ? 'aspect-square md:aspect-auto w-full flex-shrink-0 md:w-1/2'
-                          : 'aspect-square w-full'
-                      }`}
-                    >
-                      <Image
-                        src={category.categoryDetails!.thumbnailUrl}
-                        alt={`${category.name} overview`}
-                        fill
-                        className="object-cover"
-                        sizes={hasDetailItems ? '(max-width: 768px) 100vw, 50vw' : '100vw'}
-                      />
-                    </div>
+              {/* Gender sub-sections */}
+              <div className="space-y-14 mb-20">
+                {genderCards.map((gender) => {
+                  const products = allProducts.filter(p => p.genderId === gender.id).slice(0, 4);
 
-                    {/* Detail cards */}
-                    {hasDetailItems && (
-                      <div className="w-full md:w-1/2">
-                        <div className={getDetailsPanelClass(details.length)}>
-                          {details.map((detail, i) => (
-                            <div
-                              key={i}
-                              className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm"
-                            >
-                              {detail.photoUrl && (
-                                <div className="relative aspect-square overflow-hidden bg-slate-100">
-                                  <Image
-                                    src={detail.photoUrl}
-                                    alt={`${category.name} detail ${i + 1}`}
-                                    fill
-                                    className="object-cover"
-                                    sizes="(max-width: 768px) 50vw, 25vw"
-                                  />
-                                </div>
-                              )}
-                              {detail.text && (
-                                <div className="p-3">
-                                  <p className="text-xs leading-relaxed text-gray-700">{detail.text}</p>
-                                </div>
-                              )}
-                            </div>
-                          ))}
-                        </div>
+                  return (
+                    <div key={gender.slug}>
+                      {/* Sub-section header */}
+                      <div className="flex items-center justify-between mb-6 pb-3 border-b border-slate-200">
+                        <h3 className="text-2xl font-playfair font-semibold text-primary">
+                          {gender.name}
+                        </h3>
+                        <Link
+                          href={`/products/${gender.slug}#${genCat.slug}`}
+                          className="inline-flex items-center gap-1.5 text-sm font-medium text-accent hover:underline"
+                        >
+                          View All
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                          </svg>
+                        </Link>
                       </div>
-                    )}
-                  </div>
 
-                  {/* Sub-header before products */}
-                  <div className="mb-8 text-center">
+                      {products.length > 0 ? (
+                        <ProductGrid products={products} />
+                      ) : (
+                        <div className="rounded-xl border border-dashed border-slate-300 py-12 text-center">
+                          <p className="text-slate-400 text-sm">Products coming soon</p>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Product Breakdown — 5-col grid with zigzag cards */}
+              {thumbnailUrl && details.length > 0 && (
+                <div>
+                  <div className="mb-10 text-center">
                     <h3 className="text-2xl font-playfair font-semibold text-primary">
-                      More from this category
+                      {genCat.name} — Product Breakdown
                     </h3>
                     <div className="mx-auto mt-2 h-0.5 w-12 bg-accent" />
                   </div>
 
-                  <ProductGrid products={category.products} />
-                </>
-              ) : (
-                <ProductGrid products={category.products} />
+                  {/* Mobile: stack vertically. Desktop: 5-col grid — 2 cols photo, 3 cols cards */}
+                  <div className="flex flex-col gap-6 md:grid md:grid-cols-2 md:gap-6">
+
+                    {/* Left col — main product photo, 3:4 portrait */}
+                    <div className="relative aspect-[3/4] overflow-hidden rounded-xl shadow-md">
+                      <Image
+                        src={thumbnailUrl}
+                        alt={`${genCat.name} overview`}
+                        fill
+                        className="object-cover"
+                        sizes="(max-width: 768px) 100vw, 40vw"
+                      />
+                    </div>
+
+                    {/* Right col — aspect-[3/4] matches left col height (equal widths, equal ratios) */}
+                    <div className="flex flex-col gap-3 aspect-[3/4] overflow-hidden">
+                      {details.slice(0, 4).map((detail, i) => {
+                        const photoLeft = i % 2 === 0;
+                        return (
+                          <div
+                            key={i}
+                            className={`flex flex-1 min-h-0 overflow-hidden rounded-xl border border-slate-100 bg-white shadow-sm ${
+                              photoLeft ? '' : 'flex-row-reverse'
+                            }`}
+                          >
+                            {detail.photoUrl && (
+                              <div className="relative w-2/5 flex-shrink-0 m-3 overflow-hidden rounded-lg">
+                                <Image
+                                  src={detail.photoUrl}
+                                  alt={`${genCat.name} detail ${i + 1}`}
+                                  fill
+                                  className="object-cover"
+                                  sizes="(max-width: 768px) 40vw, 24vw"
+                                />
+                              </div>
+                            )}
+                            {detail.text && (
+                              <div className="flex flex-1 items-center p-4 md:p-6">
+                                <p className="text-base md:text-lg leading-relaxed text-gray-700">
+                                  {detail.text}
+                                </p>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                  </div>
+                </div>
               )}
+
             </div>
           </section>
         );
