@@ -32,7 +32,7 @@ export default async function GenderProductsPage({ params }: { params: Promise<{
 
       {/* Hero — same as /products */}
       <section className="relative h-[45vh] md:h-[56vh] overflow-hidden">
-        <Image src="/p3.jpg" alt="Our Products" fill priority className="object-cover" />
+        <Image src="/p1.jpg" alt="Our Products" fill priority className="object-cover" />
         <div className="absolute inset-0 bg-black/55" />
         <div className="relative z-10 flex h-full items-center justify-center px-4 text-center">
           <div>
