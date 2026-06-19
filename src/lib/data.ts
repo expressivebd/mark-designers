@@ -48,7 +48,6 @@ export type AboutPageData = {
 export type SisterConcernItem = {
   id: string;
   name: string;
-  tagline: string;
   slug: string;
   thumbnailUrl: string;
   description: string;
@@ -75,7 +74,6 @@ function normalizeSisterConcern(item: Record<string, unknown>): SisterConcernIte
   return {
     id,
     name,
-    tagline: String(item.tagline || item.shortDescription || item.description || ''),
     slug,
     thumbnailUrl,
     description: String(item.description || ''),

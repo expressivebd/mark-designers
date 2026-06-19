@@ -7,7 +7,6 @@ import Link from 'next/link';
 
 interface ConcernData {
     name: string;
-    tagline: string;
     location: string;
     fullAddress: string;
     established: string;
@@ -34,7 +33,8 @@ export default function SisterConcernDetail({ data }: { data: ConcernData }) {
         <>
             {/* Hero */}
             <section className="relative h-[50vh] md:h-[65vh] flex items-center justify-center overflow-hidden">
-                <Image src={data.heroImage} alt={data.name} fill className="object-cover" priority />
+                {/* <Image src={data.heroImage} alt={data.name} fill className="object-cover" priority /> */}
+                <Image src="/p1.jpg" alt={data.name} fill className="object-cover" priority />
                 <div className="absolute inset-0 bg-black/50" />
                 <motion.div
                     initial={{ opacity: 0, y: 40 }}
@@ -46,7 +46,6 @@ export default function SisterConcernDetail({ data }: { data: ConcernData }) {
                         {data.name}
                     </h1>
                     <div className="w-24 h-1 bg-accent mx-auto mt-6" />
-                    <p className="text-white/80 mt-6 text-lg md:text-xl font-light">{data.tagline}</p>
                     <div className="flex flex-wrap items-center justify-center gap-6 mt-8 text-white/70 text-sm md:text-base">
                         <div className="flex items-center gap-2">
                             <svg className="w-5 h-5 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">

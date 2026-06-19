@@ -7,7 +7,6 @@ import ConfirmDialog from './ConfirmDialog';
 
 type SisterConcernForm = {
   name: string;
-  tagline: string;
   thumbnailUrl: string;
   description: string;
   establishedYear: string;
@@ -39,7 +38,6 @@ function slugify(value: string) {
 function emptyForm(): SisterConcernForm {
   return {
     name: '',
-    tagline: '',
     thumbnailUrl: '',
     description: '',
     establishedYear: '',
@@ -260,16 +258,6 @@ export default function SisterConcernManager() {
           />
         </div>
 
-        <div className="space-y-2">
-          <label className="block text-sm font-medium text-primary">Tagline</label>
-          <input
-            type="text"
-            value={values.tagline}
-            onChange={(event) => setValues((prev) => ({ ...prev, tagline: event.target.value }))}
-            className="w-full rounded-sm border border-slate-200 px-3 py-2 text-sm"
-          />
-        </div>
-
         <UploadField
           label="Thumbnail Photo"
           value={values.thumbnailUrl}
@@ -469,9 +457,6 @@ export default function SisterConcernManager() {
                       <span className="font-medium text-primary">Name:</span> {item.name || '-'}
                     </div>
                     <div>
-                      <span className="font-medium text-primary">Tagline:</span> {item.tagline || '-'}
-                    </div>
-                    <div>
                       <span className="font-medium text-primary">Link:</span> {item.link || '-'}
                     </div>
                     <div>
@@ -509,7 +494,6 @@ export default function SisterConcernManager() {
                         setEditId(item.id);
                         setEditForm({
                           name: item.name || '',
-                          tagline: item.tagline || '',
                           thumbnailUrl: item.thumbnailUrl || '',
                           description: item.description || '',
                           establishedYear: item.establishedYear || '',

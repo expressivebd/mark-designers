@@ -175,26 +175,24 @@ export default function AboutPageClient({ about, certifications: certData }: Pro
                 keywords="Mark Designers about, garment manufacturer Bangladesh, manufacturing history"
             />
             {/* Hero Section */}
-            <section className="relative h-[60vh] md:h-[70vh] flex items-center justify-center overflow-hidden">
+            <section className="relative h-[50vh] md:h-[60vh] flex items-center justify-center overflow-hidden">
                 <Image
                     src="/p1.jpg"
-                    alt="About Mark Designers"
+                    alt="Sister Concerns"
                     fill
                     className="object-cover"
                     priority
                 />
                 <div className="absolute inset-0 bg-black/50" />
-                <motion.div
-                    initial={{ opacity: 0, y: 40 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.8, delay: 0.2 }}
-                    className="relative z-10 text-center"
-                >
-                    <h1 className="text-5xl md:text-7xl lg:text-9xl font-playfair font-bold text-white tracking-tight">
+                <div className="relative z-10 text-center px-4">
+                    <h1 className="text-4xl md:text-6xl lg:text-8xl font-playfair font-bold text-white tracking-tight">
                         ABOUT US
                     </h1>
                     <div className="w-24 h-1 bg-accent mx-auto mt-6" />
-                </motion.div>
+                    {/* <p className="text-white/80 mt-6 text-lg md:text-xl max-w-2xl mx-auto font-light">
+                        Shared details managed from admin and displayed across all concern pages
+                    </p> */}
+                </div>
             </section>
 
             {/* History Section */}
