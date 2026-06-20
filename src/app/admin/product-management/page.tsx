@@ -95,6 +95,11 @@ export default function ProductManagementAdmin() {
   const [editingDetailIndex, setEditingDetailIndex] = useState<number | null>(null);
   const [changingThumbnailFor, setChangingThumbnailFor] = useState<string | null>(null);
 
+  // Category rename
+  const [editingCategoryId, setEditingCategoryId] = useState<string | null>(null);
+  const [editingCategoryName, setEditingCategoryName] = useState('');
+  const [isSavingCategoryName, setIsSavingCategoryName] = useState(false);
+
   // Delete confirmation
   const [pendingDelete, setPendingDelete] = useState<PendingDelete>(null);
 
@@ -205,6 +210,23 @@ export default function ProductManagementAdmin() {
       body: JSON.stringify({ action: 'deleteCategory', id: categoryId }),
     });
     if (!res.ok) { setError('Failed to delete category.'); return; }
+    loadData();
+  };
+
+  const handleRenameCategory = async (id: string) => {
+    const name = editingCategoryName.trim();
+    if (!name) { setError('Category name is required.'); return; }
+    setIsSavingCategoryName(true);
+    setError('');
+    const res = await fetch('/api/admin/products', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'renameCategory', id, name }),
+    });
+    setIsSavingCategoryName(false);
+    if (!res.ok) { setError('Failed to rename category.'); return; }
+    setEditingCategoryId(null);
+    setEditingCategoryName('');
     loadData();
   };
 
@@ -540,7 +562,52 @@ export default function ProductManagementAdmin() {
               {/* Category header */}
               <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 px-5 py-4">
                 <div>
-                  <h3 className="text-xl font-playfair font-semibold text-primary">{category.name}</h3>
+                  {editingCategoryId === category.id ? (
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="text"
+                        value={editingCategoryName}
+                        onChange={(e) => setEditingCategoryName(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') handleRenameCategory(category.id);
+                          if (e.key === 'Escape') { setEditingCategoryId(null); setEditingCategoryName(''); }
+                        }}
+                        autoFocus
+                        className="rounded-sm border border-primary px-2 py-1 text-lg font-playfair font-semibold text-primary focus:outline-none"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => handleRenameCategory(category.id)}
+                        disabled={isSavingCategoryName}
+                        className="rounded-sm bg-primary px-3 py-1 text-xs font-medium text-white hover:bg-primary-dark disabled:opacity-60"
+                      >
+                        {isSavingCategoryName ? 'Saving…' : 'Save'}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => { setEditingCategoryId(null); setEditingCategoryName(''); }}
+                        className="rounded-sm border border-slate-300 px-3 py-1 text-xs font-medium text-slate-600 hover:border-slate-500"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <h3 className="text-xl font-playfair font-semibold text-primary">{category.name}</h3>
+                      {category.id !== 'uncategorized' && (
+                        <button
+                          type="button"
+                          onClick={() => { setEditingCategoryId(category.id); setEditingCategoryName(category.name); }}
+                          className="rounded-sm border border-slate-200 p-1 text-slate-400 hover:border-primary hover:text-primary"
+                          title="Edit category name"
+                        >
+                          <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536M9 13l6.586-6.586a2 2 0 012.828 2.828L11.828 15.828a2 2 0 01-1.414.586H7v-3.414a2 2 0 01.586-1.414z" />
+                          </svg>
+                        </button>
+                      )}
+                    </div>
+                  )}
                   <p className="text-xs text-slate-500">{category.products.length} product(s)</p>
                 </div>
                 <div className="flex flex-wrap items-center gap-2">

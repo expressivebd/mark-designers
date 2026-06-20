@@ -237,12 +237,29 @@ export async function PUT(request: Request) {
   }
 
   const payload = await request.json();
+  const db = await getDb();
+
+  if (payload?.action === 'renameCategory') {
+    const categoryId = parseObjectId(payload?.id);
+    if (!categoryId) {
+      return NextResponse.json({ error: 'Valid category ID is required' }, { status: 400 });
+    }
+    const name = String(payload?.name || '').trim();
+    if (!name) {
+      return NextResponse.json({ error: 'Category name is required' }, { status: 400 });
+    }
+    await db.collection('productCategories').updateOne(
+      { _id: categoryId },
+      { $set: { name, updatedAt: new Date() } }
+    );
+    revalidatePath('/', 'layout');
+    return NextResponse.json({ ok: true });
+  }
+
   const productId = parseObjectId(payload?.id);
   if (!productId) {
     return NextResponse.json({ error: 'ID is required' }, { status: 400 });
   }
-
-  const db = await getDb();
 
   if (payload?.action === 'toggleHome') {
     await db.collection('products').updateOne(
