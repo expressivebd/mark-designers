@@ -33,8 +33,8 @@ export default function SisterConcernDetail({ data }: { data: ConcernData }) {
         <>
             {/* Hero */}
             <section className="relative h-[50vh] md:h-[65vh] flex items-center justify-center overflow-hidden">
-                {/* <Image src={data.heroImage} alt={data.name} fill className="object-cover" priority /> */}
-                <Image src="/p1.jpg" alt={data.name} fill className="object-cover" priority />
+                <Image src={data.heroImage} alt={data.name} fill className="object-cover" priority />
+                {/* <Image src="/p1.jpg" alt={data.name} fill className="object-cover" priority /> */}
                 <div className="absolute inset-0 bg-black/50" />
                 <motion.div
                     initial={{ opacity: 0, y: 40 }}
