@@ -10,6 +10,30 @@ const Header = () => {
   const [showTopBar, setShowTopBar] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
   const [isTopBarOpen, setIsTopBarOpen] = useState(false);
+  const [catalogUrl, setCatalogUrl] = useState('/Mark_fashion_book.pdf');
+  const [companyProfileUrl, setCompanyProfileUrl] = useState('/Mark_Company_Profile.pdf');
+
+  useEffect(() => {
+    const loadSiteContents = async () => {
+      try {
+        const response = await fetch('/api/site-contents');
+        if (!response.ok) {
+          return;
+        }
+        const data = await response.json();
+        if (data?.catalogUrl) {
+          setCatalogUrl(data.catalogUrl);
+        }
+        if (data?.companyProfileUrl) {
+          setCompanyProfileUrl(data.companyProfileUrl);
+        }
+      } catch {
+        // keep static fallback
+      }
+    };
+
+    loadSiteContents();
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -159,7 +183,9 @@ const Header = () => {
               {/* Menu Button */}
               <button
                 onClick={() => setIsMenuOpen(true)}
-                className="flex items-center gap-3 text-primary hover:text-accent transition-colors duration-300 group border border-primary/20 rounded-full px-3 py-2 md:px-4 md:py-2.5 hover:border-accent/40"
+                className={`flex items-center gap-3 hover:text-accent transition-colors duration-300 group border rounded-full px-3 py-2 md:px-4 md:py-2.5 hover:border-accent/40 ${
+                  isScrolled ? 'text-primary border-primary/20' : 'text-white border-white/40'
+                }`}
                 aria-label="Open menu"
               >
                 <div className="flex flex-col gap-1.5">
@@ -177,7 +203,11 @@ const Header = () => {
                 href="/"
                 className="absolute left-1/2 transform -translate-x-1/2 flex flex-col items-center group"
               >
-                <h1 className="text-xl md:text-3xl lg:text-4xl font-playfair font-bold text-primary group-hover:text-accent transition-colors duration-300">
+                <h1
+                  className={`text-xl md:text-3xl lg:text-4xl font-playfair font-bold group-hover:text-accent transition-colors duration-300 ${
+                    isScrolled ? 'text-primary' : 'text-white'
+                  }`}
+                >
                   Mark Designers
                 </h1>
                 <p className="text-xs md:text-sm text-accent tracking-widest font-light">
@@ -185,11 +215,12 @@ const Header = () => {
                 </p>
               </Link>
 
-              {/* Download buttons */}
+              {/* Navbar buttons */}
               <div className="flex items-center gap-2">
                 <a
-                  href="/Mark_fashion_book.pdf"
-                  download
+                  href={catalogUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="btn-primary text-xs md:text-base px-3 py-2 md:px-8 md:py-3 rounded-md inline-flex items-center gap-2"
                 >
                   <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -198,8 +229,9 @@ const Header = () => {
                   <span className="hidden md:inline">Catalog</span>
                 </a>
                 <a
-                  href="/Mark_Company_Profile.pdf"
-                  download
+                  href={companyProfileUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="btn-accent text-xs md:text-base px-3 py-2 md:px-8 md:py-3 rounded-md inline-flex items-center gap-2"
                 >
                   <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">

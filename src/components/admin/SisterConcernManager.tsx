@@ -15,6 +15,7 @@ type SisterConcernForm = {
   personnel: string;
   totalMachines: string;
   factoryPhotos: string[];
+  companyProfileUrl: string;
   link: string;
 };
 
@@ -46,6 +47,7 @@ function emptyForm(): SisterConcernForm {
     personnel: '',
     totalMachines: '',
     factoryPhotos: [],
+    companyProfileUrl: '',
     link: '',
   };
 }
@@ -382,6 +384,16 @@ export default function SisterConcernManager() {
           photoUploadKey,
           onPhotoKeyReset
         )}
+
+        <UploadField
+          label="Company Profile PDF (Max 25MB)"
+          value={values.companyProfileUrl}
+          folder={`sister-concerns/${folderSuffix}`}
+          accept="application/pdf"
+          endpoint="/api/admin/upload-document"
+          maxSizeMb={25}
+          onChange={(url) => setValues((prev) => ({ ...prev, companyProfileUrl: url }))}
+        />
       </div>
     );
   };
@@ -486,6 +498,21 @@ export default function SisterConcernManager() {
                       <span className="font-medium text-primary">Factory Photos:</span>{' '}
                       {item.factoryPhotos?.length || 0}
                     </div>
+                    <div className="md:col-span-2">
+                      <span className="font-medium text-primary">Company Profile PDF:</span>{' '}
+                      {item.companyProfileUrl ? (
+                        <a
+                          href={item.companyProfileUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="break-all text-accent underline"
+                        >
+                          {item.companyProfileUrl}
+                        </a>
+                      ) : (
+                        '-'
+                      )}
+                    </div>
                   </div>
                   <div className="flex gap-2">
                     <button
@@ -502,6 +529,7 @@ export default function SisterConcernManager() {
                           personnel: item.personnel || '',
                           totalMachines: item.totalMachines || '',
                           factoryPhotos: item.factoryPhotos || [],
+                          companyProfileUrl: item.companyProfileUrl || '',
                           link: item.link || '',
                         });
                       }}

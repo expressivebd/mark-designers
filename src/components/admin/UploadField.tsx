@@ -9,9 +9,11 @@ type UploadFieldProps = {
   onChange: (url: string) => void;
   folder?: string;
   accept?: string;
+  endpoint?: string;
+  maxSizeMb?: number;
 };
 
-const UploadField = ({ label, value, onChange, folder, accept }: UploadFieldProps) => {
+const UploadField = ({ label, value, onChange, folder, accept, endpoint, maxSizeMb }: UploadFieldProps) => {
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState('');
 
@@ -23,6 +25,11 @@ const UploadField = ({ label, value, onChange, folder, accept }: UploadFieldProp
     (/\.(jpg|jpeg|png|webp|gif|avif|bmp|svg)(\?|$)/i.test(value) || value.includes('/image/'));
 
   const handleUpload = async (file: File) => {
+    if (maxSizeMb && file.size > maxSizeMb * 1024 * 1024) {
+      setError(`File is too large. Max size is ${maxSizeMb}MB.`);
+      return;
+    }
+
     setIsUploading(true);
     setError('');
 
@@ -33,19 +40,20 @@ const UploadField = ({ label, value, onChange, folder, accept }: UploadFieldProp
         formData.append('folder', folder);
       }
 
-      const response = await fetch('/api/admin/upload', {
+      const response = await fetch(endpoint || '/api/admin/upload', {
         method: 'POST',
         body: formData,
       });
 
+      const data = await response.json().catch(() => null);
+
       if (!response.ok) {
-        throw new Error('Upload failed');
+        throw new Error(data?.error || `Upload failed (${response.status})`);
       }
 
-      const data = await response.json();
       onChange(data.url);
     } catch (err) {
-      setError('Upload failed. Please try again.');
+      setError(err instanceof Error ? err.message : 'Upload failed. Please try again.');
     } finally {
       setIsUploading(false);
     }

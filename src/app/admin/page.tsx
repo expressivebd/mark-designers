@@ -30,6 +30,11 @@ export default function AdminDashboard() {
           href="/admin/sister-concerns"
         />
         <AdminSectionCard
+          title="Contents"
+          description="Upload the navbar Catalog and Company Profile PDFs."
+          href="/admin/contents"
+        />
+        <AdminSectionCard
           title="Products"
           description="Manage the product grid shown on the homepage."
           href="/admin/product-management"

@@ -15,6 +15,7 @@ type SisterConcernNavItem = {
   id: string;
   name: string;
   href: string;
+  profileUrl: string;
 };
 
 type GenderNavItem = {
@@ -32,10 +33,16 @@ const menuItems: MenuItem[] = [
     number: '03',
     children: [],
   },
-  { label: 'Products', href: '/products', number: '04', children: [] },
-  { label: 'Certifications', href: '/certifications', number: '05' },
-  { label: 'Clients', href: '/clients', number: '06' },
-  { label: 'Contact', href: '/contact', number: '07' },
+  {
+    label: 'Profiles',
+    href: '',
+    number: '04',
+    children: [],
+  },
+  { label: 'Products', href: '/products', number: '05', children: [] },
+  { label: 'Certifications', href: '/certifications', number: '06' },
+  { label: 'Clients', href: '/clients', number: '07' },
+  { label: 'Contact', href: '/contact', number: '08' },
 ];
 
 const socialLinks = [
@@ -191,20 +198,32 @@ const StaggeredMenu = ({ isOpen, onClose }: StaggeredMenuProps) => {
                       exit="closed"
                       variants={itemVariants}
                     >
-                      {(item.label === 'Our Facilities' || item.label === 'Products') ? (
+                      {(item.label === 'Our Facilities' || item.label === 'Products' || item.label === 'Profiles') ? (
                         /* Accordion Item */
                         <div>
                           <div className="group flex items-center gap-6 py-3 text-white">
                             <span className="text-sm font-light text-accent/60 min-w-[2rem]">
                               {item.number}
                             </span>
-                            <Link
-                              href={item.href}
-                              onClick={onClose}
-                              className="text-3xl md:text-4xl lg:text-5xl font-playfair font-semibold hover:text-accent transition-colors duration-300"
-                            >
-                              {item.label}
-                            </Link>
+                            {item.label === 'Profiles' ? (
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  setExpandedItem(expandedItem === item.label ? null : item.label)
+                                }
+                                className="text-3xl md:text-4xl lg:text-5xl font-playfair font-semibold hover:text-accent transition-colors duration-300 text-left"
+                              >
+                                {item.label}
+                              </button>
+                            ) : (
+                              <Link
+                                href={item.href}
+                                onClick={onClose}
+                                className="text-3xl md:text-4xl lg:text-5xl font-playfair font-semibold hover:text-accent transition-colors duration-300"
+                              >
+                                {item.label}
+                              </Link>
+                            )}
                             <button
                               type="button"
                               onClick={() =>
@@ -242,17 +261,41 @@ const StaggeredMenu = ({ isOpen, onClose }: StaggeredMenuProps) => {
                                 className="overflow-hidden"
                               >
                                 <ul className="pl-14 md:pl-16 space-y-1 pb-2">
-                                  {(item.label === 'Products' ? productGenders : sisterConcerns).map((child) => (
-                                    <li key={child.id}>
-                                      <Link
-                                        href={child.href}
-                                        onClick={onClose}
-                                        className="block py-2 text-lg md:text-xl font-inter text-white/70 hover:text-accent transition-colors duration-300"
-                                      >
-                                        {child.name}
-                                      </Link>
-                                    </li>
-                                  ))}
+                                  {item.label === 'Profiles' ? (
+                                    sisterConcerns.filter((child) => child.profileUrl).length > 0 ? (
+                                      sisterConcerns
+                                        .filter((child) => child.profileUrl)
+                                        .map((child) => (
+                                          <li key={child.id}>
+                                            <a
+                                              href={child.profileUrl}
+                                              target="_blank"
+                                              rel="noopener noreferrer"
+                                              onClick={onClose}
+                                              className="block py-2 text-lg md:text-xl font-inter text-white/70 hover:text-accent transition-colors duration-300"
+                                            >
+                                              {child.name}
+                                            </a>
+                                          </li>
+                                        ))
+                                    ) : (
+                                      <li className="py-2 text-base font-inter text-white/40">
+                                        No company profiles available yet.
+                                      </li>
+                                    )
+                                  ) : (
+                                    (item.label === 'Products' ? productGenders : sisterConcerns).map((child) => (
+                                      <li key={child.id}>
+                                        <Link
+                                          href={child.href}
+                                          onClick={onClose}
+                                          className="block py-2 text-lg md:text-xl font-inter text-white/70 hover:text-accent transition-colors duration-300"
+                                        >
+                                          {child.name}
+                                        </Link>
+                                      </li>
+                                    ))
+                                  )}
                                 </ul>
                               </motion.div>
                             )}

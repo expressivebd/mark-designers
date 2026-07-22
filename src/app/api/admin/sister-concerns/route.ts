@@ -50,6 +50,7 @@ function sanitizePayload(payload: Record<string, unknown>) {
     factoryPhotos: Array.isArray(payload?.factoryPhotos)
       ? payload.factoryPhotos.filter((photo): photo is string => typeof photo === 'string' && photo.trim().length > 0)
       : [],
+    companyProfileUrl: String(payload?.companyProfileUrl || '').trim(),
   };
 }
 

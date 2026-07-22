@@ -27,6 +27,11 @@ export type HomepageData = {
   }>;
 };
 
+export type SiteContentsData = {
+  catalogUrl: string;
+  companyProfileUrl: string;
+};
+
 export type AboutFacilityItem = {
   name: string;
   imageUrl: string;
@@ -59,6 +64,7 @@ export type SisterConcernItem = {
   yearsInOperation: number;
   totalMachines: string;
   factoryPhotos: string[];
+  companyProfileUrl: string;
 };
 
 function normalizeSisterConcern(item: Record<string, unknown>): SisterConcernItem {
@@ -87,6 +93,7 @@ function normalizeSisterConcern(item: Record<string, unknown>): SisterConcernIte
     factoryPhotos: Array.isArray(item.factoryPhotos)
       ? item.factoryPhotos.filter((photo): photo is string => typeof photo === 'string')
       : [],
+    companyProfileUrl: String(item.companyProfileUrl || ''),
   };
 }
 
@@ -219,6 +226,14 @@ export async function getHomepage() {
   const doc = await db
     .collection<HomepageData & { _id: string }>('homepage')
     .findOne({ _id: 'homepage' });
+  return doc ? doc : null;
+}
+
+export async function getSiteContents() {
+  const db = await getDb();
+  const doc = await db
+    .collection<SiteContentsData & { _id: string }>('siteContents')
+    .findOne({ _id: 'siteContents' });
   return doc ? doc : null;
 }
 

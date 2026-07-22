@@ -9,6 +9,7 @@ export async function GET() {
       id: concern.id,
       name: concern.name,
       href: concern.link,
+      profileUrl: concern.companyProfileUrl,
     }))
   );
 }

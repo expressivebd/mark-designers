@@ -12,6 +12,7 @@ interface ConcernData {
     established: string;
     heroImage: string;
     description: string[];
+    companyProfileUrl: string;
     stats: { value: string; label: string }[];
     machineryImages: { src: string; alt: string; description: string }[];
 }
@@ -79,6 +80,28 @@ export default function SisterConcernDetail({ data }: { data: ConcernData }) {
                             {para}
                         </motion.p>
                     ))}
+
+                    {data.companyProfileUrl && (
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ duration: 0.5 }}
+                            className="mt-6 flex justify-center"
+                        >
+                            <a
+                                href={data.companyProfileUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="btn-primary inline-flex items-center gap-2"
+                            >
+                                <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                                <span>View Detailed Company Profile</span>
+                            </a>
+                        </motion.div>
+                    )}
                 </div>
             </section>
 
