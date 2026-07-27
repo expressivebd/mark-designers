@@ -80,13 +80,13 @@ export default function SisterConcernManager() {
     try {
       const response = await fetch('/api/admin/sister-concerns');
       if (!response.ok) {
-        throw new Error('Failed to load sister concerns');
+        throw new Error('Failed to load facilities');
       }
 
       const data = (await response.json()) as SisterConcernItem[];
       setItems(data || []);
     } catch {
-      setError('Failed to load sister concerns.');
+      setError('Failed to load facilities.');
     } finally {
       setIsLoading(false);
     }
@@ -120,7 +120,7 @@ export default function SisterConcernManager() {
     });
 
     if (!response.ok) {
-      setError('Failed to create sister concern.');
+      setError('Failed to create facility.');
       return;
     }
 
@@ -143,7 +143,7 @@ export default function SisterConcernManager() {
     });
 
     if (!response.ok) {
-      setError('Failed to update sister concern.');
+      setError('Failed to update facility.');
       return;
     }
 
@@ -163,7 +163,7 @@ export default function SisterConcernManager() {
     });
 
     if (!response.ok) {
-      setError('Failed to delete sister concern.');
+      setError('Failed to delete facility.');
       return;
     }
 
@@ -401,7 +401,7 @@ export default function SisterConcernManager() {
   return (
     <div className="space-y-8">
       <div className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
-        <h2 className="text-xl font-playfair font-semibold text-primary mb-4">Add Sister Concern</h2>
+        <h2 className="text-xl font-playfair font-semibold text-primary mb-4">Add Facility</h2>
         {renderBaseFields(
           form,
           (updater) => setForm((prev) => updater(prev)),
@@ -417,12 +417,12 @@ export default function SisterConcernManager() {
           onClick={handleCreate}
           className="mt-4 rounded-sm bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary-dark"
         >
-          Create Sister Concern
+          Create Facility
         </button>
       </div>
 
       <div className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
-        <h2 className="text-xl font-playfair font-semibold text-primary mb-4">Existing Sister Concerns</h2>
+        <h2 className="text-xl font-playfair font-semibold text-primary mb-4">Existing Facilities</h2>
         {isLoading && <p className="text-sm text-gray-600">Loading...</p>}
         {!isLoading && items.length === 0 && <p className="text-sm text-gray-600">No items yet.</p>}
 
@@ -556,8 +556,8 @@ export default function SisterConcernManager() {
 
       <ConfirmDialog
         isOpen={Boolean(deleteTarget)}
-        title="Delete Sister Concern"
-        message={`Are you sure you want to delete ${deleteTarget?.name || 'this sister concern'}?`}
+        title="Delete Facility"
+        message={`Are you sure you want to delete ${deleteTarget?.name || 'this facility'}?`}
         confirmLabel="Confirm"
         cancelLabel="Cancel"
         onConfirm={confirmDelete}

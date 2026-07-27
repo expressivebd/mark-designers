@@ -5,8 +5,8 @@ export default function SisterConcernsAdmin() {
   return (
     <div className="space-y-6">
       <AdminPageHeader
-        title="Sister Concerns"
-        description="Manage sister concerns for homepage, listing, and detail pages from one place."
+        title="Our Facilities"
+        description="Manage facilities for homepage, listing, and detail pages from one place."
       />
       <SisterConcernManager />
     </div>

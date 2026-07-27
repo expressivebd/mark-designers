@@ -140,6 +140,12 @@ export type CertificationItem = {
   logoUrl: string;
 };
 
+export type CertificationSectionItem = {
+  id: string;
+  heading: string;
+  description: string;
+};
+
 export type ClientItem = {
   id: string;
   name: string;
@@ -413,6 +419,16 @@ export async function getCertifications() {
   const db = await getDb();
   const docs = await db
     .collection<Omit<CertificationItem, 'id'> & { _id: ObjectId }>('certifications')
+    .find({})
+    .sort({ order: 1, createdAt: 1 })
+    .toArray();
+  return docs.map(mapId);
+}
+
+export async function getCertificationSections() {
+  const db = await getDb();
+  const docs = await db
+    .collection<Omit<CertificationSectionItem, 'id'> & { _id: ObjectId }>('certificationSections')
     .find({})
     .sort({ order: 1, createdAt: 1 })
     .toArray();

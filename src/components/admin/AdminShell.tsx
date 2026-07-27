@@ -8,7 +8,7 @@ const navItems = [
   { label: 'Dashboard', href: '/admin' },
   { label: 'Homepage', href: '/admin/homepage' },
   { label: 'About', href: '/admin/about' },
-  { label: 'Sister Concerns', href: '/admin/sister-concerns' },
+  { label: 'Our Facilities', href: '/admin/sister-concerns' },
   { label: 'Contents', href: '/admin/contents' },
   { label: 'Products', href: '/admin/product-management' },
   { label: 'Certifications', href: '/admin/certification-management' },

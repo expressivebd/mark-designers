@@ -1,11 +1,11 @@
 ﻿import Image from 'next/image';
 import SEOHead from '@/components/SEOHead';
-import { getCertifications } from '@/lib/data';
+import { getCertifications, getCertificationSections } from '@/lib/data';
 
 export const revalidate = 3600;
 
 export default async function CertificationsPage() {
-  const certifications = await getCertifications();
+  const [certifications, sections] = await Promise.all([getCertifications(), getCertificationSections()]);
 
   return (
     <>
@@ -53,6 +53,19 @@ export default async function CertificationsPage() {
           </div>
         </div>
       </section>
+
+      {sections.length > 0 && (
+        <section className="section-padding bg-slate-50">
+          <div className="container-custom space-y-16">
+            {sections.map((section) => (
+              <div key={section.id} className="mx-auto max-w-3xl text-center">
+                <h2 className="heading-secondary">{section.heading}</h2>
+                <div className="rich-content text-left" dangerouslySetInnerHTML={{ __html: section.description }} />
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
     </>
   );
 }

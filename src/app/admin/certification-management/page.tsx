@@ -1,5 +1,6 @@
 import AdminPageHeader from '@/components/admin/AdminPageHeader';
 import CertificationManager from '@/components/admin/CertificationManager';
+import CertificationSectionManager from '@/components/admin/CertificationSectionManager';
 
 export default function CertificationManagementAdmin() {
   return (
@@ -9,6 +10,7 @@ export default function CertificationManagementAdmin() {
         description="Manage certification logos for the homepage carousel."
       />
       <CertificationManager />
+      <CertificationSectionManager />
     </div>
   );
 }

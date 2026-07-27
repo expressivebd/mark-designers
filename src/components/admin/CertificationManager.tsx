@@ -21,6 +21,8 @@ const emptyForm: FormState = {
   logoUrl: '',
 };
 
+const COLLAPSED_ROW_COUNT = 4;
+
 export default function CertificationManager() {
   const [items, setItems] = useState<CertificationItem[]>([]);
   const [form, setForm] = useState<FormState>(emptyForm);
@@ -29,6 +31,7 @@ export default function CertificationManager() {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
+  const [isExpanded, setIsExpanded] = useState(true);
 
   const loadItems = useCallback(async () => {
     setIsLoading(true);
@@ -161,13 +164,35 @@ export default function CertificationManager() {
       </div>
 
       <div className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
-        <h2 className="mb-4 text-xl font-playfair font-semibold text-primary">Existing Certifications</h2>
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="text-xl font-playfair font-semibold text-primary">Existing Certifications</h2>
+          {items.length > COLLAPSED_ROW_COUNT && (
+            <button
+              type="button"
+              onClick={() => setIsExpanded((prev) => !prev)}
+              className="flex items-center gap-1.5 rounded-sm border border-slate-200 px-3 py-1.5 text-xs font-medium text-primary hover:bg-slate-50"
+            >
+              {isExpanded ? 'Collapse' : `Show All (${items.length})`}
+              <svg
+                viewBox="0 0 20 20"
+                fill="currentColor"
+                className={`h-3.5 w-3.5 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            </button>
+          )}
+        </div>
 
         {isLoading && <p className="text-sm text-gray-600">Loading...</p>}
         {!isLoading && items.length === 0 && <p className="text-sm text-gray-600">No certifications yet.</p>}
 
         <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4">
-          {items.map((item) => (
+          {(isExpanded ? items : items.slice(0, COLLAPSED_ROW_COUNT)).map((item) => (
             <div key={item.id} className="rounded-md border border-slate-200 p-3">
               {editId === item.id ? (
                 <div className="space-y-3">
