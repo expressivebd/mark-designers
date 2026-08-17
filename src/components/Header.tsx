@@ -63,7 +63,7 @@ const Header = () => {
           }`}
       >
         {/* Top Bar - desktop only */}
-        <div className="hidden md:block bg-primary text-white py-2 text-sm">
+        <div className="hidden lg:block bg-primary text-white py-2 text-sm">
           <div className="container-custom">
             <div className="flex justify-between items-center gap-4">
               <div className="flex items-center gap-2">
@@ -113,13 +113,13 @@ const Header = () => {
         </div>
 
         {/* Main Navbar */}
-        <div className="py-4 md:py-5">
+        <div className="py-4 lg:py-5">
           <div className="container-custom">
             <div className="flex items-center justify-between">
               {/* Menu Button */}
               <button
                 onClick={() => setIsMenuOpen(true)}
-                className={`flex items-center gap-3 hover:text-accent transition-colors duration-300 group border rounded-full px-3 py-2 md:px-4 md:py-2.5 hover:border-accent/40 ${
+                className={`flex items-center gap-3 hover:text-accent transition-colors duration-300 group border rounded-full px-3 py-2 lg:px-4 lg:py-2.5 hover:border-accent/40 shrink-0 ${
                   isScrolled ? 'text-primary border-primary/20' : 'text-white border-white/40'
                 }`}
                 aria-label="Open menu"
@@ -129,51 +129,52 @@ const Header = () => {
                   <span className="w-6 h-0.5 bg-current transition-all duration-300"></span>
                   <span className="w-4 h-0.5 bg-current group-hover:w-8 transition-all duration-300"></span>
                 </div>
-                <span className="hidden md:inline font-medium text-sm tracking-wider">
+                <span className="hidden lg:inline font-medium text-sm tracking-wider">
                   MENU
                 </span>
               </button>
 
-              {/* Logo - Always Centered */}
+              {/* Logo - in flow below lg so it can never overlap the buttons,
+                  exactly centred on desktop */}
               <Link
                 href="/"
-                className="absolute left-1/2 transform -translate-x-1/2 flex flex-col items-center group"
+                className="flex-1 min-w-0 px-2 flex flex-col items-center text-center group lg:absolute lg:left-1/2 lg:-translate-x-1/2 lg:flex-none lg:px-0"
               >
                 <h1
-                  className={`text-xl md:text-3xl lg:text-4xl font-playfair font-bold group-hover:text-accent transition-colors duration-300 ${
+                  className={`text-[13px] sm:text-lg lg:text-4xl font-playfair font-bold leading-tight whitespace-nowrap group-hover:text-accent transition-colors duration-300 ${
                     isScrolled ? 'text-primary' : 'text-white'
                   }`}
                 >
                   Mark Designers Ltd.
                 </h1>
-                <p className="text-xs md:text-sm text-accent tracking-widest font-light">
+                <p className="text-[10px] sm:text-xs lg:text-sm text-accent tracking-widest font-light">
                   SINCE 1995
                 </p>
               </Link>
 
               {/* Navbar buttons */}
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 shrink-0">
                 <a
                   href={catalogUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="btn-primary text-xs md:text-base px-3 py-2 md:px-8 md:py-3 rounded-md inline-flex items-center gap-2"
+                  className="btn-primary text-xs lg:text-base px-3 py-2 lg:px-8 lg:py-3 rounded-md inline-flex items-center gap-2"
                 >
                   <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                   </svg>
-                  <span className="hidden md:inline">Catalog</span>
+                  <span className="hidden lg:inline">Catalog</span>
                 </a>
                 <a
                   href={companyProfileUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="btn-accent text-xs md:text-base px-3 py-2 md:px-8 md:py-3 rounded-md inline-flex items-center gap-2"
+                  className="btn-accent text-xs lg:text-base px-3 py-2 lg:px-8 lg:py-3 rounded-md inline-flex items-center gap-2"
                 >
                   <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                   </svg>
-                  <span className="hidden md:flex flex-col items-center leading-none">
+                  <span className="hidden lg:flex flex-col items-center leading-none">
                     <span className="text-[13px]">Company</span>
                     <span className="text-[13px]">Profile</span>
                   </span>
