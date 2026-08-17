@@ -77,13 +77,21 @@ function normalizeSisterConcern(item: Record<string, unknown>): SisterConcernIte
   const yearsFromYear = establishedYear ? currentYear - Number(establishedYear) : 0;
   const yearsInOperation = Number(item.yearsInOperation || yearsFromYear || 0);
 
+  // Facilities saved before the /sister-concerns -> /our-facilities rename still
+  // carry the old prefix in their stored link. Rewrite it on read so those docs
+  // keep resolving without a database migration. External links are left alone.
+  const storedLink = String(item.link || '').trim();
+  const link = storedLink
+    ? storedLink.replace(/^\/sister-concerns(?=\/|$)/, '/our-facilities')
+    : `/our-facilities/${slug}`;
+
   return {
     id,
     name,
     slug,
     thumbnailUrl,
     description: String(item.description || ''),
-    link: String(item.link || `/sister-concerns/${slug}`),
+    link,
     establishedYear,
     location: String(item.location || ''),
     capacity: String(item.capacity || ''),
@@ -265,7 +273,14 @@ export async function getSisterConcernBySlug(slug: string) {
   const db = await getDb();
   const doc = await db
     .collection<Record<string, unknown> & { _id: ObjectId }>('sisterConcerns')
-    .findOne({ $or: [{ slug }, { link: `/sister-concerns/${slug}` }] });
+    .findOne({
+      $or: [
+        { slug },
+        { link: `/our-facilities/${slug}` },
+        // Legacy docs stored before the route rename.
+        { link: `/sister-concerns/${slug}` },
+      ],
+    });
 
   if (!doc) {
     return null;

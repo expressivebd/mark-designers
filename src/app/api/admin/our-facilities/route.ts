@@ -32,7 +32,7 @@ function sanitizePayload(payload: Record<string, unknown>) {
       ? currentYear - Number(establishedYear)
       : 0;
 
-  const defaultLink = slug ? `/sister-concerns/${slug}` : '/sister-concerns';
+  const defaultLink = slug ? `/our-facilities/${slug}` : '/our-facilities';
   const link = String(payload?.link || '').trim() || defaultLink;
 
   return {

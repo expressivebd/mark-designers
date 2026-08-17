@@ -8,7 +8,7 @@ const Footer = () => {
 
   const companyLinks = [
     { label: 'About Us', href: '/about' },
-    { label: 'Our Facilities', href: '/sister-concerns' },
+    { label: 'Our Facilities', href: '/our-facilities' },
     { label: 'Certifications', href: '/certifications' },
   ];
 
@@ -72,7 +72,7 @@ const Footer = () => {
           <div className="lg:col-span-2">
             <Link href="/" className="inline-block mb-6">
               <h3 className="text-3xl font-playfair font-bold text-white hover:text-accent transition-colors">
-                Mark Designers
+                Mark Designers Ltd.
               </h3>
               <p className="text-accent text-sm tracking-widest">SINCE 1995</p>
             </Link>
@@ -161,13 +161,13 @@ const Footer = () => {
             </p>
             <div className="flex gap-6">
               <Link
-                href="/privacy"
+                href="/"
                 className="text-white/60 hover:text-accent transition-colors"
               >
                 Privacy Policy
               </Link>
               <Link
-                href="/terms"
+                href="/"
                 className="text-white/60 hover:text-accent transition-colors"
               >
                 Terms of Service

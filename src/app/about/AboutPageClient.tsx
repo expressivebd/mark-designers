@@ -43,7 +43,7 @@ type Props = {
 };
 
 const defaultStats: AboutStat[] = [
-    { number: 3, suffix: '', label: 'Sister Concerns' },
+    { number: 3, suffix: '', label: 'Our Facilities' },
     { number: 45000, suffix: '+', label: 'Daily Capacity (pcs)' },
     { number: 8000, suffix: '+', label: 'Personnel' },
     { number: 30, suffix: '+', label: 'Years Experience' },
@@ -171,14 +171,14 @@ export default function AboutPageClient({ about, certifications: certData }: Pro
         <>
             <SEOHead
                 title="About Us"
-                description="Learn about Mark Designers Ltd — a leading garment manufacturer in Bangladesh since 1995, with 3 sister concerns, 8000+ personnel, and 45,000+ daily capacity."
+                description="Learn about Mark Designers Ltd — a leading garment manufacturer in Bangladesh since 1995, with 3 facilities, 8000+ personnel, and 45,000+ daily capacity."
                 keywords="Mark Designers about, garment manufacturer Bangladesh, manufacturing history"
             />
             {/* Hero Section */}
             <section className="relative h-[50vh] md:h-[60vh] flex items-center justify-center overflow-hidden">
                 <Image
                     src="/p1.jpg"
-                    alt="Sister Concerns"
+                    alt="Our Facilities"
                     fill
                     className="object-cover"
                     priority

@@ -100,7 +100,7 @@ export default function HomepageAdmin() {
       <AdminCard>
         <h2 className="text-xl font-playfair font-semibold text-primary mb-4">Managed Sections</h2>
         <div className="grid gap-3 md:grid-cols-2">
-          <Link href="/admin/sister-concerns" className="rounded-sm border border-slate-200 px-4 py-3 text-sm font-medium text-primary hover:border-accent">
+          <Link href="/admin/our-facilities" className="rounded-sm border border-slate-200 px-4 py-3 text-sm font-medium text-primary hover:border-accent">
             Our Facilities Management
           </Link>
           <Link href="/admin/product-management" className="rounded-sm border border-slate-200 px-4 py-3 text-sm font-medium text-primary hover:border-accent">

@@ -27,7 +27,7 @@ export default function AdminDashboard() {
         <AdminSectionCard
           title="Our Facilities"
           description="Update facility cards and descriptions."
-          href="/admin/sister-concerns"
+          href="/admin/our-facilities"
         />
         <AdminSectionCard
           title="Contents"

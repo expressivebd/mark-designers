@@ -80,7 +80,7 @@ export default function SiteContentsManager() {
         <h2 className="text-xl font-playfair font-semibold text-primary mb-4">Company Profile</h2>
         <p className="text-sm text-gray-600 mb-4">
           PDF served by the &quot;Company Profile&quot; button in the site navbar. This is the
-          overall company profile, separate from individual sister concern profiles.
+          overall company profile, separate from individual facility profiles.
         </p>
         <UploadField
           label="Company Profile PDF (Max 25MB)"

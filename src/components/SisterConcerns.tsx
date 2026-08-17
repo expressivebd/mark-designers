@@ -78,10 +78,10 @@ const SisterConcerns = ({ items }: { items?: SisterConcernItem[] }) => {
                     </div>
 
                     <Link
-                      href={concern.link || '/sister-concerns'}
+                      href={concern.link || '/our-facilities'}
                       className="inline-flex items-center gap-2 text-primary font-medium hover:text-accent transition-colors duration-300 group/link mt-6"
                     >
-                      <span>More</span>
+                      <span>Explore</span>
                       <svg
                         className="w-5 h-5 group-hover/link:translate-x-1 transition-transform"
                         fill="none"
@@ -102,7 +102,7 @@ const SisterConcerns = ({ items }: { items?: SisterConcernItem[] }) => {
             ))}
           </div>
         ) : (
-          <p className="text-center text-gray-600">Sister concerns will appear here once published.</p>
+          <p className="text-center text-gray-600">Our facilities will appear here once published.</p>
         )}
       </div>
     </section>

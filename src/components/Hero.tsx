@@ -108,13 +108,13 @@ const Hero = ({ data }: { data?: HeroData | null }) => {
             className="flex flex-col sm:flex-row gap-4 justify-center items-center"
           >
             <a
-              href="#about"
+              href="/about"
               className="btn-accent px-10 py-4 text-lg hover:scale-105 transition-transform"
             >
               Our Story
             </a>
             <a
-              href="#products"
+              href="/products"
               className="px-10 py-4 text-lg bg-white/10 backdrop-blur-sm text-white border-2 border-white rounded-sm font-medium hover:bg-white hover:text-primary transition-all duration-300"
             >
               View Products

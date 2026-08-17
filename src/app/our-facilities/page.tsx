@@ -12,7 +12,7 @@ export default async function SisterConcernsPage() {
             <section className="relative h-[50vh] md:h-[60vh] flex items-center justify-center overflow-hidden">
                 <Image
                     src="/p1.jpg"
-                    alt="Sister Concerns"
+                    alt="Our Facilities"
                     fill
                     className="object-cover"
                     priority
@@ -71,7 +71,7 @@ export default async function SisterConcernsPage() {
                                     </div>
 
                                     <Link href={concern.link} className="btn-primary inline-flex items-center gap-2 group">
-                                        <span>More</span>
+                                        <span>Explore</span>
                                         <svg
                                             className="w-5 h-5 group-hover:translate-x-1 transition-transform"
                                             fill="none"
@@ -92,7 +92,7 @@ export default async function SisterConcernsPage() {
                     </div>
 
                     {concerns.length === 0 && (
-                        <div className="text-center py-20 text-slate-500">No sister concerns found.</div>
+                        <div className="text-center py-20 text-slate-500">No facilities found.</div>
                     )}
                 </div>
             </section>

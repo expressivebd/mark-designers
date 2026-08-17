@@ -29,7 +29,7 @@ const menuItems: MenuItem[] = [
   { label: 'About', href: '/about', number: '02' },
   {
     label: 'Our Facilities',
-    href: '/sister-concerns',
+    href: '/our-facilities',
     number: '03',
     children: [],
   },
@@ -76,7 +76,7 @@ const StaggeredMenu = ({ isOpen, onClose }: StaggeredMenuProps) => {
   useEffect(() => {
     const loadSisterConcerns = async () => {
       try {
-        const response = await fetch('/api/sister-concerns');
+        const response = await fetch('/api/our-facilities');
         if (!response.ok) {
           return;
         }
@@ -229,7 +229,7 @@ const StaggeredMenu = ({ isOpen, onClose }: StaggeredMenuProps) => {
                               onClick={() =>
                                 setExpandedItem(expandedItem === item.label ? null : item.label)
                               }
-                              aria-label="Toggle sister concerns list"
+                              aria-label="Toggle our facilities list"
                               className="ml-auto hover:text-accent transition-colors duration-300"
                             >
                               <svg

@@ -22,6 +22,40 @@ const nextConfig = {
       },
     ],
   },
+  async redirects() {
+    return [
+      // The "Sister Concerns" section was renamed to "Our Facilities". Keep the
+      // old public URLs working for bookmarks, search results and any links
+      // that were shared before the rename.
+      {
+        source: '/sister-concerns',
+        destination: '/our-facilities',
+        permanent: true,
+      },
+      {
+        source: '/sister-concerns/:slug',
+        destination: '/our-facilities/:slug',
+        permanent: true,
+      },
+      {
+        source: '/admin/sister-concerns',
+        destination: '/admin/our-facilities',
+        permanent: true,
+      },
+      // 308 preserves the method and body, so an admin tab still running the
+      // pre-rename JS keeps working against the old endpoints.
+      {
+        source: '/api/sister-concerns',
+        destination: '/api/our-facilities',
+        permanent: true,
+      },
+      {
+        source: '/api/admin/sister-concerns',
+        destination: '/api/admin/our-facilities',
+        permanent: true,
+      },
+    ]
+  },
 }
 
 module.exports = nextConfig

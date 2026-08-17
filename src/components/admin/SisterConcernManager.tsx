@@ -78,7 +78,7 @@ export default function SisterConcernManager() {
     setError('');
 
     try {
-      const response = await fetch('/api/admin/sister-concerns');
+      const response = await fetch('/api/admin/our-facilities');
       if (!response.ok) {
         throw new Error('Failed to load facilities');
       }
@@ -97,14 +97,14 @@ export default function SisterConcernManager() {
   }, [fetchItems]);
 
   const formSlug = useMemo(() => slugify(form.name), [form.name]);
-  const formLink = formSlug ? `/sister-concerns/${formSlug}` : '/sister-concerns';
+  const formLink = formSlug ? `/our-facilities/${formSlug}` : '/our-facilities';
   const formYearsInOperation = useMemo(
     () => getYearsInOperation(form.establishedYear),
     [form.establishedYear]
   );
 
   const editSlug = useMemo(() => slugify(editForm.name), [editForm.name]);
-  const editLink = editSlug ? `/sister-concerns/${editSlug}` : '/sister-concerns';
+  const editLink = editSlug ? `/our-facilities/${editSlug}` : '/our-facilities';
   const editYearsInOperation = useMemo(
     () => getYearsInOperation(editForm.establishedYear),
     [editForm.establishedYear]
@@ -113,7 +113,7 @@ export default function SisterConcernManager() {
   const handleCreate = async () => {
     setError('');
 
-    const response = await fetch('/api/admin/sister-concerns', {
+    const response = await fetch('/api/admin/our-facilities', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(form),
@@ -136,7 +136,7 @@ export default function SisterConcernManager() {
 
     setError('');
 
-    const response = await fetch('/api/admin/sister-concerns', {
+    const response = await fetch('/api/admin/our-facilities', {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id: editId, ...editForm }),
@@ -156,7 +156,7 @@ export default function SisterConcernManager() {
   const handleDelete = async (id: string) => {
     setError('');
 
-    const response = await fetch('/api/admin/sister-concerns', {
+    const response = await fetch('/api/admin/our-facilities', {
       method: 'DELETE',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id }),
@@ -370,7 +370,7 @@ export default function SisterConcernManager() {
           <input
             type="text"
             value={values.link}
-            placeholder="e.g. /sister-concerns/my-facility or https://example.com"
+            placeholder="e.g. /our-facilities/my-facility or https://example.com"
             onChange={(event) => setValues((prev) => ({ ...prev, link: event.target.value }))}
             className="w-full rounded-sm border border-slate-200 px-3 py-2 text-sm"
           />
