@@ -1,10 +1,14 @@
 import { NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/admin';
 import { getSupabaseAdmin } from '@/lib/supabase';
+import { buildUploadPath, MAX_DOCUMENT_SIZE_BYTES as MAX_SIZE_BYTES } from '@/lib/upload-path';
 
 const BUCKET = 'documents';
-const MAX_SIZE_BYTES = 25 * 1024 * 1024;
 
+// Legacy proxy upload. The admin panel now uploads directly to Supabase via
+// ./sign, because a body sent here is capped at 4.5MB by Vercel. Kept so an
+// admin tab still running the pre-direct-upload JS keeps working for small
+// files rather than failing outright.
 export async function POST(request: Request) {
   const session = await requireAdmin();
   if (!session) {
@@ -26,15 +30,7 @@ export async function POST(request: Request) {
   const arrayBuffer = await file.arrayBuffer();
   const buffer = Buffer.from(arrayBuffer);
 
-  const originalName = file.name || 'file';
-  const extMatch = originalName.match(/\.[a-zA-Z0-9]+$/);
-  const ext = extMatch ? extMatch[0].toLowerCase() : '';
-  const base =
-    originalName
-      .replace(/\.[a-zA-Z0-9]+$/, '')
-      .replace(/[^a-zA-Z0-9-_]+/g, '-')
-      .slice(0, 60) || 'file';
-  const path = `${folder}/${base}-${Date.now().toString(36)}${ext}`;
+  const path = buildUploadPath(file.name, folder);
 
   const supabase = getSupabaseAdmin();
   const { error } = await supabase.storage.from(BUCKET).upload(path, buffer, {

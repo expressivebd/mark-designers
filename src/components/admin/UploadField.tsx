@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
+import { uploadFile } from '@/lib/upload-client';
 
 type UploadFieldProps = {
   label: string;
@@ -15,6 +16,7 @@ type UploadFieldProps = {
 
 const UploadField = ({ label, value, onChange, folder, accept, endpoint, maxSizeMb }: UploadFieldProps) => {
   const [isUploading, setIsUploading] = useState(false);
+  const [progress, setProgress] = useState(0);
   const [error, setError] = useState('');
 
   const normalizedAccept = accept || '.jpg,.jpeg,.png,image/jpeg,image/png';
@@ -31,31 +33,24 @@ const UploadField = ({ label, value, onChange, folder, accept, endpoint, maxSize
     }
 
     setIsUploading(true);
+    setProgress(0);
     setError('');
 
     try {
-      const formData = new FormData();
-      formData.append('file', file);
-      if (folder) {
-        formData.append('folder', folder);
-      }
-
-      const response = await fetch(endpoint || '/api/admin/upload', {
-        method: 'POST',
-        body: formData,
+      // Uploads browser -> storage provider directly. Routing the bytes through
+      // our own API would cap them at Vercel's 4.5MB request-body limit.
+      const url = await uploadFile(file, {
+        endpoint,
+        folder,
+        onProgress: setProgress,
       });
 
-      const data = await response.json().catch(() => null);
-
-      if (!response.ok) {
-        throw new Error(data?.error || `Upload failed (${response.status})`);
-      }
-
-      onChange(data.url);
+      onChange(url);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Upload failed. Please try again.');
     } finally {
       setIsUploading(false);
+      setProgress(0);
     }
   };
 
@@ -66,15 +61,23 @@ const UploadField = ({ label, value, onChange, folder, accept, endpoint, maxSize
         <input
           type="file"
           accept={normalizedAccept}
+          disabled={isUploading}
           onChange={(event) => {
             const file = event.target.files?.[0];
+            // Clear the input so re-picking the same file after a failed upload
+            // still fires a change event.
+            event.target.value = '';
             if (file) {
               handleUpload(file);
             }
           }}
           className="block w-full text-sm text-gray-600 file:mr-4 file:rounded-sm file:border-0 file:bg-accent file:px-4 file:py-2 file:text-white file:font-medium hover:file:bg-accent-dark"
         />
-        {isUploading && <span className="text-sm text-accent">Uploading...</span>}
+        {isUploading && (
+          <span className="whitespace-nowrap text-sm text-accent">
+            {progress > 0 ? `Uploading ${progress}%` : 'Uploading...'}
+          </span>
+        )}
       </div>
 
       {hasImageValue && (

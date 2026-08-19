@@ -1,9 +1,13 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   experimental: {
-    // Next.js 16's Proxy layer caps request bodies at 10MB by default, well
-    // under the 25MB PDF uploads this app needs to support. Raise it with
-    // headroom above the 25MB app-level limit we enforce ourselves.
+    // Next.js 16's Proxy layer caps request bodies at 10MB by default. Raised
+    // for self-hosted runs (`next start`), where it is the binding limit.
+    //
+    // NOTE: this has no effect on Vercel, whose serverless functions reject any
+    // request body over 4.5MB at the edge. Admin uploads therefore go straight
+    // from the browser to Supabase/Cloudinary via the /sign routes and never
+    // pass through a function at all - see src/lib/upload-client.ts.
     proxyClientMaxBodySize: '30mb',
   },
   images: {

@@ -2,6 +2,10 @@ import { NextResponse } from 'next/server';
 import cloudinary from '@/lib/cloudinary';
 import { requireAdmin } from '@/lib/admin';
 
+// Legacy proxy upload. The admin panel now uploads directly to Cloudinary via
+// ./sign, because a body sent here is capped at 4.5MB by Vercel. Kept so an
+// admin tab still running the pre-direct-upload JS keeps working for small
+// files rather than failing outright.
 export async function POST(request: Request) {
   const session = await requireAdmin();
   if (!session) {
